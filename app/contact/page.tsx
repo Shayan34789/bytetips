@@ -16,10 +16,10 @@ export default function ContactPage() {
       </p>
       <p className="mt-5 text-[16px] leading-relaxed text-slate-700">
         <a
-          href="mailto:shayan34890@gmail.com"
+          href="mailto:bytetips0@gmail.com"
           className="font-medium text-accent underline decoration-accent-mid underline-offset-2 hover:text-accent"
         >
-          shayan34890@gmail.com
+          bytetips0@gmail.com
         </a>
       </p>
       <p className="mt-5 text-[16px] leading-relaxed text-slate-700">

@@ -12,6 +12,20 @@ export default function AboutPage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-12 sm:py-16">
       <h1 className="text-3xl font-bold tracking-tight text-ink">About</h1>
+      <figure className="mt-6">
+        {/* Plain img: next/image optimization is incompatible with static export. */}
+        <img
+          src="/about-workspace.jpg"
+          alt="Minimal developer workspace with a laptop and headphones"
+          width={1200}
+          height={627}
+          className="w-full rounded-xl border border-line"
+          loading="lazy"
+        />
+        <figcaption className="mt-2 text-xs text-muted">
+          Photo: Pexels
+        </figcaption>
+      </figure>
       <p className="mt-5 text-[16px] leading-relaxed text-slate-700">
         ByteTips is a small blog of short, practical how-to guides for developers — JSON, JWT,
         images, CSS, and everyday privacy. Each post gives you the answer, a code example, and a

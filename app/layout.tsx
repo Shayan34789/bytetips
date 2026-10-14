@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     "Short, practical how-to guides for developers: JSON, JWT, images, CSS, and privacy. Every post points at a free tool that does the job in your browser.",
   applicationName: "ByteTips",
   metadataBase: new URL(siteUrl),
+  alternates: { canonical: siteUrl },
   keywords: [
     "developer tutorials",
     "how to format JSON",

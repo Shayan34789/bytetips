@@ -1,0 +1,11 @@
+# Cloudflare Workers Static Assets config for ByteTips.
+# The blog is a Next.js static export (output: "export"), so it is deployed
+# as plain static files from ./out — NOT via the OpenNext SSR adapter.
+# Without this file, `wrangler deploy` auto-detects Next.js and runs
+# @opennextjs/cloudflare, which crashes (it expects a .next/standalone
+# server build that static export never produces).
+name = "bytetips"
+compatibility_date = "2026-10-14"
+
+[assets]
+directory = "./out"

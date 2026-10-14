@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import { CookieBanner } from "@/components/cookie-banner";
+import Logo from "@/components/logo";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -48,12 +49,21 @@ export const metadata: Metadata = {
     title: "ByteTips — Practical Developer How-To Guides",
     description:
       "Short, practical how-to guides for developers: JSON, JWT, images, CSS, and privacy.",
+    images: [
+      {
+        url: `${siteUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "ByteTips — Practical developer how-to guides",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "ByteTips — Practical Developer How-To Guides",
     description:
       "Short, practical how-to guides for developers: JSON, JWT, images, CSS, and privacy.",
+    images: [`${siteUrl}/og-image.png`],
   },
 };
 
@@ -63,8 +73,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${inter.variable} min-h-[100dvh] bg-canvas font-sans text-ink antialiased`}>
         <header className="border-b border-line bg-canvas">
           <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-            <Link href="/" className="text-[19px] font-bold tracking-tight text-ink">
-              ByteTips<span className="text-accent">.</span>
+            <Link href="/" aria-label="ByteTips home">
+              <Logo />
             </Link>
             <nav className="flex items-center gap-5 text-sm font-medium text-muted">
               <Link href="/" className="transition-colors hover:text-ink">
@@ -86,8 +96,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <CookieBanner />
         <footer className="border-t border-line bg-canvas">
           <div className="mx-auto flex max-w-3xl flex-col gap-3 px-6 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-[15px] font-bold tracking-tight text-ink">
-              ByteTips<span className="text-accent">.</span>
+            <span className="inline-flex">
+              <Logo size={22} />
             </span>
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
               <a href="https://byte-kit.dev" className="transition-colors hover:text-ink">

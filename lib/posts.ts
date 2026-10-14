@@ -16,6 +16,73 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "encodeuri-vs-encodeuricomponent",
+    title: "encodeURI vs encodeURIComponent: When to Use Each (and the Double-Encoding Trap)",
+    excerpt:
+      "encodeURI is for a whole URL, encodeURIComponent is for one value inside it. Mix them up and you get broken links or %2520 double-encoding.",
+    date: "2026-10-14",
+    readingTime: "5 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: use encodeURI for a whole URL and encodeURIComponent for a single value inside one. encodeURI leaves the characters that give a URL its structure alone, so the result is still a working URL. encodeURIComponent encodes almost everything except letters, digits, and - _ . ! ~ * ' ( ), so the result is safe to drop into a query string as one value. Use the wrong one and you get broken links — or the classic double-encoding bug where a space shows up as %2520.",
+      },
+      { type: "h2", text: "The one rule" },
+      {
+        type: "p",
+        text: "A URL has two kinds of characters: structure and data. Structure characters like ? & = / : give the URL its shape — they separate the path, the query string, and the key-value pairs. Data characters are the actual values: a search term, a name, a redirect target. encodeURI assumes you are handing it a complete URL, so it preserves the structure and only encodes the characters that are illegal anywhere. encodeURIComponent assumes you are handing it one piece of data, so it encodes the structure characters too — because inside a value, an & is data, not a separator. The rule follows from that: encode each value with encodeURIComponent, then assemble the URL. Encode the whole finished URL with encodeURI only if it still contains raw spaces or unicode.",
+      },
+      { type: "h2", text: "What each one leaves alone" },
+      {
+        type: "list",
+        items: [
+          "encodeURI leaves alone: ; , / ? : @ & = + $ # — the characters that make a URL work. It encodes spaces, unicode, quotes, and angle brackets.",
+          "encodeURIComponent leaves alone: A-Z a-z 0-9 - _ . ! ~ * ' ( ) — and encodes everything else, including / ? : @ & = + $ # and spaces.",
+          "Use this when: encodeURIComponent for query values, path segments, and anything a user typed. encodeURI for a full URL you already built.",
+        ],
+      },
+      { type: "h2", text: "The bug everyone hits" },
+      {
+        type: "p",
+        text: "The most common mistake is using encodeURI on a value that contains an & or an = sign. Watch what happens to a name with an ampersand in it:",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `const name = "John & Jane";\\n\\n// WRONG: encodeURI leaves & alone, so the value splits in two\\n"https://example.com/search?name=" + encodeURI(name);\\n// → https://example.com/search?name=John & Jane  (broken: name=John, plus a stray param)\\n\\n// RIGHT: encodeURIComponent encodes the & as %26\\n"https://example.com/search?name=" + encodeURIComponent(name);\\n// → https://example.com/search?name=John%20%26%20Jane  (one value, correct)`,
+      },
+      {
+        type: "p",
+        text: "The server reads the broken version as two parameters — name=John and a junk parameter — and your search silently returns the wrong results. No error is thrown, which is what makes this bug so annoying to track down.",
+      },
+      { type: "h2", text: "The double-encoding trap" },
+      {
+        type: "p",
+        text: "The second classic bug is encoding twice. A space becomes %20 after one round of encoding. Run it through the encoder again and the % itself gets encoded to %25, producing %2520. If you see %2520, %252F, or %253A in a URL, something encoded an already-encoded string. The usual culprits are a helper that encodes and a library that encodes again (fetch, axios, and URLSearchParams all encode values for you), or encoding a full URL that was already encoded. The fix is a boundary rule: encode exactly once, at the moment you assemble the URL — never before, never after.",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `// WRONG: encoded twice — % becomes %25\\nencodeURIComponent(encodeURIComponent("a b")); // "a%2520b"\\n\\n// RIGHT: encode once\\nencodeURIComponent("a b"); // "a%20b"\\n\\n// Let URLSearchParams do it — it encodes values for you\\nconst params = new URLSearchParams({ name: "John & Jane" });\\nparams.toString(); // "name=John+%26+Jane"`,
+      },
+      { type: "h2", text: "Quick answers" },
+      {
+        type: "list",
+        items: [
+          "What is the difference between %20 and +? Both mean a space in a query string. %20 is the percent-encoding; + is the form-encoding used by URLSearchParams and HTML forms. Servers accept both in query strings, but only %20 is valid inside a URL path.",
+          "Should I use URLSearchParams instead? For query strings, yes — it is the safest option. It encodes each value once, handles the & and = cases, and removes the whole class of bugs above. Use encodeURIComponent when you need a single encoded value, for example inside a path segment or a redirect URL.",
+          "When is encodeURI the right call? When you have a complete URL that contains raw spaces or unicode characters — for example a URL a user pasted — and you want to make it safe without breaking its structure.",
+        ],
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste a value into the [URL & Base64 Encoder](https://byte-kit.dev/tools/url-base64) to see encodeURI and encodeURIComponent side by side — and to catch double-encoding before it ships. If you work with encoded data often, [How to Encode Text to Base64](/posts/how-to-encode-text-to-base64) covers the other encoding you meet everywhere: Base64.",
+      },
+    ],
+  },
+  {
     slug: "fix-unexpected-token-not-valid-json",
     title: "Fix 'Unexpected token < is not valid JSON' in JavaScript (fetch)",
     excerpt:

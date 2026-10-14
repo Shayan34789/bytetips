@@ -16,6 +16,97 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "fix-unexpected-token-not-valid-json",
+    title: "Fix 'Unexpected token < is not valid JSON' in JavaScript (fetch)",
+    excerpt:
+      "If your fetch call fails with 'Unexpected token < is not valid JSON', your API returned an HTML page, not JSON. Here is how to prove it and fix it.",
+    date: "2026-10-14",
+    readingTime: "5 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: if the first character is <, you are not parsing JSON — you got an HTML page. Your fetch call reached an error page, a login page, or a 404 page, and response.json() choked on the < of <!DOCTYPE html>. The fix is almost never in your parsing code. Read the response as text, look at what the server actually sent, then fix the URL or the server behavior that produced HTML instead of JSON.",
+      },
+      { type: "h2", text: "What the error means" },
+      {
+        type: "p",
+        text: "Unexpected token < in JSON at position 0 is JavaScript telling you the very first character it saw was <, which is never valid at the start of JSON. Valid JSON starts with {, [, a quote, a digit, true, false, or null. A < means the body begins with a tag — almost always <!DOCTYPE html> or <html>. The JSON parser did its job correctly. The real problem happened one step earlier: the server answered with HTML when your code expected JSON. Treating this as a parsing bug sends you down the wrong path. Treat it as a wrong-response bug and the fix becomes obvious.",
+      },
+      { type: "h2", text: "Diagnose it in four steps" },
+      {
+        type: "p",
+        text: "Before changing any code, find out what the server actually returned. Swap response.json() for response.text() for one run and inspect the body:",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `const res = await fetch("/api/users");\\nconst text = await res.text();\\nconsole.log(res.status, res.headers.get("content-type"));\\nconsole.log(text.slice(0, 200));\\nconst data = JSON.parse(text); // only after you know it is JSON`,
+      },
+      {
+        type: "list",
+        items: [
+          "Check the status: a 404, 500, or 301/302 redirect is a red flag — error pages are HTML.",
+          "Check the content-type header: it should be application/json. If it says text/html, the server never intended to send JSON.",
+          "Read the first 200 characters: a login form means your session expired; a 'Cannot GET /api/...' page means the route does not exist.",
+          "Fix the upstream cause — then switch back to response.json().",
+        ],
+      },
+      { type: "h2", text: "Match the error variant to the cause" },
+      {
+        type: "p",
+        text: "The same family of errors has several variants, and each points at a different cause:",
+      },
+      {
+        type: "list",
+        items: [
+          "Unexpected token < in JSON at position 0 — the body is an HTML page (404, 500, or login redirect).",
+          "Unexpected end of JSON input — the body is empty, often a 204 No Content response. Check the status before parsing.",
+          "Unexpected token u in JSON at position 0 — you parsed the literal string 'undefined', usually because a variable holding the response was never assigned.",
+          "Unexpected token } in JSON — the JSON itself is malformed, often a trailing comma or a missing quote. Paste it into a validator to find the exact spot.",
+        ],
+      },
+      { type: "h2", text: "The usual causes" },
+      {
+        type: "list",
+        items: [
+          "Wrong URL: a typo in the API path, a missing /api prefix, or a dev-server proxy that is not running returns your app's HTML shell or a 404 page.",
+          "Auth redirect: the session expired and the server redirected to a login page. The browser follows the redirect silently, so fetch sees a 200 with HTML.",
+          "Server crash: an unhandled exception renders the framework's HTML error page instead of a JSON error.",
+          "Trailing slash or base-path mismatch: /api/users and /api/users/ can hit different routes on some servers.",
+        ],
+      },
+      { type: "h2", text: "A fetch guard that fails loudly" },
+      {
+        type: "p",
+        text: "Once you know the cause, make the failure loud instead of cryptic. Check the status and content-type before parsing, and throw an error that includes the actual body:",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `async function fetchJson(url) {\\n  const res = await fetch(url);\\n  const text = await res.text();\\n  if (!res.ok) {\\n    throw new Error("Request failed: " + res.status + " " + res.statusText + " — " + text.slice(0, 200));\\n  }\\n  if (!res.headers.get("content-type")?.includes("application/json")) {\\n    throw new Error("Expected JSON, got: " + text.slice(0, 200));\\n  }\\n  return JSON.parse(text);\\n}`,
+      },
+      {
+        type: "p",
+        text: "With this guard, the next failure tells you the status code, the content type, and the first 200 characters of the body — everything you need to find the cause in seconds. You can also confirm the diagnosis from the terminal with curl -i, which shows headers and body together.",
+      },
+      { type: "h2", text: "Quick answers" },
+      {
+        type: "list",
+        items: [
+          "Can JSON have comments or trailing commas? No. JSON forbids comments, trailing commas, and single-quoted strings — all three are common reasons a hand-edited file fails to parse.",
+          "Does response.json() tell you the body? No. It throws on the first bad character and discards the body, which is why reading as text first is the key diagnostic step.",
+          "Is the fix ever in the parser? Almost never. If the body is HTML, no parser option will help — fix the request or the server.",
+        ],
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste the raw response into the [JSON Formatter](https://byte-kit.dev/tools/json-formatter) to validate it and see exactly where it breaks — if the body is HTML, the formatter shows you that immediately. If your JSON is valid but hard to read, [How to Format JSON in JavaScript](/posts/how-to-format-json-in-javascript) shows how to pretty-print and minify it.",
+      },
+    ],
+  },
+  {
     slug: "how-to-count-tokens-before-prompting-llm",
     title: "How to Count Tokens Before Sending a Prompt to an LLM",
     excerpt:

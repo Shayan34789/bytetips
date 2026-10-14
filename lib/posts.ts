@@ -20,7 +20,7 @@ export const posts: Post[] = [
     title: "How to Count Tokens Before Sending a Prompt to an LLM",
     excerpt:
       "Every LLM charges by the token and thinks in a fixed-size window. Learn what a token is, why the count matters, and how to estimate it before you send.",
-    date: "2026-10-23",
+    date: "2026-10-14",
     readingTime: "5 min read",
     author: "Shayan",
     content: [
@@ -84,7 +84,7 @@ export const posts: Post[] = [
     title: "How to Compress Images Without Losing Quality",
     excerpt:
       "A phone photo is 3–6 MB. Learn the three levers — format, quality, dimensions — that shrink it by 80% with no visible difference.",
-    date: "2026-10-22",
+    date: "2026-10-14",
     readingTime: "5 min read",
     author: "Shayan",
     content: [
@@ -152,7 +152,7 @@ export const posts: Post[] = [
     title: "How to Encode Text to Base64",
     excerpt:
       "Base64 looks like encryption, but it is not. Learn how the encoding works, how to do it safely in JavaScript, and when to reach for it.",
-    date: "2026-10-21",
+    date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
     content: [
@@ -221,7 +221,7 @@ export const posts: Post[] = [
     title: "How to Convert Text Case: camelCase, snake_case, and kebab-case",
     excerpt:
       "Every codebase mixes naming conventions. Learn the five cases, why each language picks its own, and the edge cases that break naive converters.",
-    date: "2026-10-20",
+    date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
     content: [
@@ -295,7 +295,7 @@ export const posts: Post[] = [
     title: "How to Use Regex in JavaScript",
     excerpt:
       "Regex looks like keyboard noise, but twenty percent of it covers ninety percent of real tasks. Learn literals, methods, flags, and the three traps everyone hits.",
-    date: "2026-10-19",
+    date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
     content: [
@@ -448,7 +448,7 @@ export const posts: Post[] = [
     title: "What Is a JWT? How to Decode One Safely",
     excerpt:
       "A JWT is three Base64 segments separated by dots. Learn what each part does, how to decode the payload, and what never to trust.",
-    date: "2026-10-15",
+    date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
     content: [
@@ -510,7 +510,7 @@ export const posts: Post[] = [
     title: "How to Convert HEIC Photos to JPG",
     excerpt:
       "iPhones save photos as HEIC, and half the web still wants JPG. Here are the fastest ways to convert — including one that never uploads your photos.",
-    date: "2026-10-16",
+    date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
     content: [
@@ -559,7 +559,7 @@ export const posts: Post[] = [
     title: "PX to REM: Why It Matters and How to Convert",
     excerpt:
       "Pixels ignore your users' font-size settings. REM units respect them. Learn the conversion, when REM wins, and when PX is still fine.",
-    date: "2026-10-17",
+    date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
     content: [
@@ -621,7 +621,7 @@ export const posts: Post[] = [
     title: "How to Remove EXIF Data from Photos Before Sharing",
     excerpt:
       "Every photo you share can carry your GPS location, device, and timestamps in hidden EXIF metadata. Learn what it contains and how to strip it.",
-    date: "2026-10-18",
+    date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
     content: [

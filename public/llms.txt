@@ -1,0 +1,27 @@
+# ByteTips
+
+> Short, practical how-to guides for developers: JSON, JWT, images, CSS, and everyday privacy. Each post gives the answer, a code example, and a link to a free tool that does the job in your browser.
+
+## Guides
+
+- [How to Count Tokens Before Sending a Prompt to an LLM](https://bytetips.tech/posts/how-to-count-tokens-before-prompting-llm/): Estimate token usage before prompting, so you stay inside context limits and control cost.
+- [How to Compress Images Without Losing Quality](https://bytetips.tech/posts/how-to-compress-images-without-losing-quality/): Shrink image file size while keeping them sharp, with the right format and quality settings.
+- [How to Encode Text to Base64](https://bytetips.tech/posts/how-to-encode-text-to-base64/): Encode and decode Base64 text in JavaScript and online.
+- [How to Convert Text Case: camelCase, snake_case, and kebab-case](https://bytetips.tech/posts/how-to-convert-text-case/): Convert identifiers between camelCase, snake_case, kebab-case, PascalCase, and more.
+- [How to Use Regex in JavaScript](https://bytetips.tech/posts/how-to-use-regex-in-javascript/): Test and learn regular expressions with live matching in JavaScript.
+- [How to Format JSON in JavaScript](https://bytetips.tech/posts/how-to-format-json-in-javascript/): Pretty-print, validate, and fix JSON in JavaScript and online.
+- [What Is a JWT? How to Decode One Safely](https://bytetips.tech/posts/what-is-jwt-decode-safely/): Decode a JSON Web Token without sending it to a server, and check its claims.
+- [How to Convert HEIC Photos to JPG](https://bytetips.tech/posts/how-to-convert-heic-to-jpg/): Convert iPhone HEIC photos to JPG or PNG in the browser, no upload needed.
+- [PX to REM: Why It Matters and How to Convert](https://bytetips.tech/posts/px-to-rem-why-it-matters/): Convert pixels to REM units for accessible, scalable CSS.
+- [How to Remove EXIF Data from Photos Before Sharing](https://bytetips.tech/posts/how-to-remove-exif-data-from-photos/): Strip location and device metadata from photos before posting them.
+
+## Tools
+
+- [Byte-Kit](https://byte-kit.dev): 24 free developer tools that run entirely in your browser — JSON formatter, JWT decoder, Base64/URL encoder, regex tester, color converter, image compressor, HEIC converter, EXIF remover, and more. No uploads, no accounts.
+
+## Pages
+
+- [About](https://bytetips.tech/about/): About ByteTips.
+- [Contact](https://bytetips.tech/contact/): Contact the ByteTips developer.
+- [Privacy Policy](https://bytetips.tech/privacy/): Privacy policy.
+- [Terms](https://bytetips.tech/terms/): Terms of use.

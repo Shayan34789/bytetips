@@ -908,6 +908,94 @@ export const posts: Post[] = [
       },
     ],
   },
+  {
+    slug: "convert-yaml-to-json",
+    title: "How to Convert YAML to JSON: Python, Node, yq, and Online (Without Uploading Secrets)",
+    excerpt:
+      "Convert YAML to JSON with Python's yaml.safe_load, Node's js-yaml, or yq -o=json — plus what gets lost in the trip (comments, anchors, yes/no coercion) and how to convert in your browser without uploading secrets.",
+    date: "2026-10-15",
+    readingTime: "6 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: parse the YAML and dump it as JSON. In Python that is yaml.safe_load followed by json.dumps; in Node it is js-yaml's load plus JSON.stringify; on the command line it is yq -o=json. For a one-off conversion, paste the YAML into an in-browser converter — nothing leaves your device, which matters when the file holds API keys or database passwords. The conversion itself is mechanical; the surprises are in what YAML allows and JSON does not: comments, anchors, multi-document files, and plain values like yes that silently become booleans.",
+      },
+      { type: "h2", text: "Pick your method" },
+      {
+        type: "list",
+        items: [
+          "Python — you already have it and PyYAML installed: yaml.safe_load + json.dumps. Best for scripts and CI pipelines.",
+          "Node — js-yaml is the standard: yaml.load + JSON.stringify. Best when the project is already JavaScript.",
+          "yq — the jq of YAML: yq -o=json file.yaml. Best for shell pipelines and Kubernetes manifests.",
+          "Online converter — paste and convert in the browser. Best for one-offs, especially when the file contains secrets.",
+          "PowerShell — has no built-in YAML cmdlet, so do not plan around one: install yq via winget or use Python.",
+        ],
+      },
+      { type: "h2", text: "Python" },
+      {
+        type: "code",
+        lang: "python",
+        code: `import yaml, json\\n\\nwith open("config.yaml") as f:\\n    data = yaml.safe_load(f)  # never yaml.load without a Loader — safe_load blocks arbitrary code execution\\n\\nprint(json.dumps(data, indent=2))`,
+      },
+      {
+        type: "p",
+        text: "Use safe_load, not load. Plain yaml.load can construct arbitrary Python objects from a malicious file — safe_load only builds plain dicts, lists, strings, and numbers. If a teammate's config.yaml came from the internet, this one-word difference is a real security boundary.",
+      },
+      { type: "h2", text: "Node.js" },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `import yaml from "js-yaml";\\nimport { readFileSync } from "node:fs";\\n\\nconst data = yaml.load(readFileSync("config.yaml", "utf8"));\\nconsole.log(JSON.stringify(data, null, 2));`,
+      },
+      { type: "h2", text: "yq on the command line" },
+      {
+        type: "code",
+        lang: "bash",
+        code: `# one file to stdout\\nyq -o=json config.yaml\\n\\n# one file to disk\\nyq -o=json config.yaml > config.json\\n\\n# every manifest in a directory (the Kubernetes habit)\\nfor f in manifests/*.yaml; do\\n  yq -o=json "$f" > "\${f%.yaml}.json"\\ndone`,
+      },
+      { type: "h2", text: "What gets lost in conversion" },
+      {
+        type: "p",
+        text: "JSON is a smaller language than YAML, so some things cannot survive the trip. Nothing errors — they just quietly disappear or change shape:",
+      },
+      {
+        type: "list",
+        items: [
+          "Comments — JSON has no comments, so every # note is dropped silently.",
+          "Anchors and aliases (&base / *base) — they are resolved and duplicated into plain repeated values in the JSON output.",
+          "Multi-document files (--- separators) — JSON has a single root. Most tools emit one JSON object per document or take the first; check before you trust the output.",
+          "Date and bool coercion — YAML 1.1 treats yes, no, on, and off as booleans, and unquoted 2026-10-15 as a date. If a value must stay a string, quote it in the YAML before converting.",
+        ],
+      },
+      { type: "h2", text: "The two errors everyone hits" },
+      {
+        type: "code",
+        lang: "text",
+        code: `# PyYAML\\nfound character '\\t' that cannot start any token\\n\\n# js-yaml\\nbad indentation of a mapping entry`,
+      },
+      {
+        type: "p",
+        text: "YAML forbids tabs for indentation — both of these errors mean a tab slipped in. Replace tabs with spaces (2 is the convention) and the parse succeeds. The other classic is the yes-becomes-true coercion above: a config value of on: yes arrives in your JSON as true, and your string comparison silently fails. Quote it: on: \"yes\".",
+      },
+      { type: "h2", text: "Quick answers" },
+      {
+        type: "list",
+        items: [
+          "Can I convert without installing anything? Yes — paste the YAML into an in-browser converter. The parsing happens in your tab, so nothing is uploaded; that is the whole point when the file contains secrets.",
+          "Is it safe to paste a kubeconfig into an online converter? Only if it runs entirely in your browser with no upload. Never paste secrets into a server-side converter — assume anything you send is logged.",
+          "What about JSON to YAML? The reverse is safe and lossless for data: yq -o=yaml file.json, or yaml.dump(JSON.parse(text)) in Node with js-yaml.",
+          "Why did my on: yes become true? YAML 1.1 boolean coercion: yes, no, on, and off are booleans in PyYAML and js-yaml's default schema. Quote the value to keep it a string.",
+          "Do I need yq or will jq work? jq reads JSON, not YAML. Pipe them together — yq -o=json file.yaml | jq '.spec.replicas' — when you want jq's querying on YAML input.",
+        ],
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste the YAML into the [JSON / YAML / CSV Converter](https://byte-kit.dev/tools/json-yaml-csv) — it converts entirely in your browser, so configs with secrets never leave your device. If the JSON it produces looks wrong, [How to Format JSON in JavaScript](/posts/how-to-format-json-in-javascript/) shows how to validate and pretty-print it.",
+      },
+    ],
+  },
 ];
 
 export const getPost = (slug: string) => posts.find((post) => post.slug === slug);

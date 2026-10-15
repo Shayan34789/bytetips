@@ -832,6 +832,82 @@ export const posts: Post[] = [
       },
     ],
   },
+  {
+    slug: "how-to-check-if-jwt-is-expired",
+    title: "How to Check If a JWT Is Expired (the exp Claim)",
+    excerpt:
+      "A JWT carries its expiry in the exp claim — seconds since the Unix epoch. Decode the payload, compare exp with the current time, and watch out for the seconds-vs-milliseconds trap.",
+    date: "2026-10-15",
+    readingTime: "5 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "A JWT is expired when its exp claim — the expiry timestamp in seconds since the Unix epoch — is smaller than the current time in seconds. Decode the payload (it is only base64-encoded, not encrypted), read exp, and compare it with the current time: exp < Math.floor(Date.now() / 1000) means the token is expired. The single biggest gotcha is units: exp is in seconds, but JavaScript's Date.now() returns milliseconds. Compare them directly and every token looks expired.",
+      },
+      { type: "h2", text: "What exp actually is" },
+      {
+        type: "p",
+        text: "exp is one of the registered claims defined by the JWT standard (RFC 7519). Its value is a NumericDate: the number of seconds since 1970-01-01T00:00:00Z, not counting leap seconds. On or after that moment, the token must not be accepted for processing. Note that exp is optional — a token without an exp claim never expires according to this check. Whether you accept such tokens is a policy decision: strict systems reject tokens with no exp outright.",
+      },
+      { type: "h2", text: "The one-line check" },
+      {
+        type: "p",
+        text: "A JWT has three dot-separated parts: header, payload, signature. The payload is base64url-encoded JSON, so decoding it takes one line. Note the two character replacements — JWT uses base64url, which swaps + and / for - and _.",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `function isExpired(token) {\n  const b64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");\n  const payload = JSON.parse(atob(b64));\n  if (typeof payload.exp !== "number") return false; // no expiry claim\n  return payload.exp < Math.floor(Date.now() / 1000);\n}\n\nisExpired(token); // true → expired, do not accept`,
+      },
+      { type: "h2", text: "The milliseconds trap" },
+      {
+        type: "p",
+        text: "This is the bug behind most reports of a token saying expired right after login, and it is the same ×1000 mix-up that haunts every Unix timestamp. Date.now() returns milliseconds; exp is in seconds. Compare them raw and exp is always a thousand times smaller than now — so every token reads as long expired.",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `// WRONG: seconds vs milliseconds — always true, every token "expired"\n1699999999 < Date.now(); // true\n\n// RIGHT: same units on both sides\npayload.exp < Math.floor(Date.now() / 1000); // seconds vs seconds\npayload.exp * 1000 < Date.now();             // ms vs ms`,
+      },
+      {
+        type: "p",
+        text: "Quick way to tell which unit a timestamp is in: count the digits. Around 2026, seconds look like 1790000000 (10 digits) and milliseconds look like 1790000000000 (13 digits). If you see 13 digits where you expected 10, divide by 1000.",
+      },
+      { type: "h2", text: "exp vs iat vs nbf" },
+      {
+        type: "p",
+        text: "JWT defines three time claims, and all three are NumericDate values in seconds:",
+      },
+      {
+        type: "list",
+        items: [
+          "exp (Expiration Time) — do not accept the token on or after this time.",
+          "iat (Issued At) — when the token was created; useful for computing age.",
+          "nbf (Not Before) — do not accept the token before this time.",
+        ],
+      },
+      {
+        type: "p",
+        text: "Most auth libraries validate exp (and nbf) automatically. Hand-rolled checks usually remember exp and forget nbf — if your tokens carry both, check both.",
+      },
+      { type: "h2", text: "Quick answers" },
+      {
+        type: "list",
+        items: [
+          "Can I check expiry without the secret? Yes. The payload is only encoded, not encrypted, so anyone holding the token can read exp. But reading exp and trusting the token are different things: checking exp tells you whether it is stale, verifying the signature (which needs the secret or public key) tells you whether it is genuine. Do both.",
+          "What if exp is missing? The token has no expiry by this check. Decide a policy: many systems reject tokens without exp because a forever-token is a liability if leaked.",
+          "Should I allow clock skew? Yes — 30 to 60 seconds of leeway is standard, because the issuing server's clock and yours rarely agree exactly. Auth libraries expose this as leeway or clockTolerance.",
+          "Why does a fresh token say expired? Three usual causes: the seconds-vs-milliseconds bug above, the server clock running ahead of yours, or displaying the epoch in the wrong timezone — the claim itself is UTC, so convert before blaming the token.",
+        ],
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste the token into the [JWT Decoder](https://byte-kit.dev/tools/jwt-decoder) — the payload is decoded in your browser with nothing uploaded, and exp is shown as a readable date so you can see at a glance whether it is stale. New to how JWTs are put together? Start with [What Is a JWT? How to Decode One Safely](/posts/what-is-jwt-decode-safely).",
+      },
+    ],
+  },
 ];
 
 export const getPost = (slug: string) => posts.find((post) => post.slug === slug);

@@ -50,7 +50,7 @@ export const posts: Post[] = [
       {
         type: "code",
         lang: "javascript",
-        code: `const name = "John & Jane";\\n\\n// WRONG: encodeURI leaves & alone, so the value splits in two\\n"https://example.com/search?name=" + encodeURI(name);\\n// → https://example.com/search?name=John & Jane  (broken: name=John, plus a stray param)\\n\\n// RIGHT: encodeURIComponent encodes the & as %26\\n"https://example.com/search?name=" + encodeURIComponent(name);\\n// → https://example.com/search?name=John%20%26%20Jane  (one value, correct)`,
+        code: `const name = "John & Jane";\n\n// WRONG: encodeURI leaves & alone, so the value splits in two\n"https://example.com/search?name=" + encodeURI(name);\n// → https://example.com/search?name=John & Jane  (broken: name=John, plus a stray param)\n\n// RIGHT: encodeURIComponent encodes the & as %26\n"https://example.com/search?name=" + encodeURIComponent(name);\n// → https://example.com/search?name=John%20%26%20Jane  (one value, correct)`,
       },
       {
         type: "p",
@@ -64,7 +64,7 @@ export const posts: Post[] = [
       {
         type: "code",
         lang: "javascript",
-        code: `// WRONG: encoded twice — % becomes %25\\nencodeURIComponent(encodeURIComponent("a b")); // "a%2520b"\\n\\n// RIGHT: encode once\\nencodeURIComponent("a b"); // "a%20b"\\n\\n// Let URLSearchParams do it — it encodes values for you\\nconst params = new URLSearchParams({ name: "John & Jane" });\\nparams.toString(); // "name=John+%26+Jane"`,
+        code: `// WRONG: encoded twice — % becomes %25\nencodeURIComponent(encodeURIComponent("a b")); // "a%2520b"\n\n// RIGHT: encode once\nencodeURIComponent("a b"); // "a%20b"\n\n// Let URLSearchParams do it — it encodes values for you\nconst params = new URLSearchParams({ name: "John & Jane" });\nparams.toString(); // "name=John+%26+Jane"`,
       },
       { type: "h2", text: "Quick answers" },
       {
@@ -108,7 +108,7 @@ export const posts: Post[] = [
       {
         type: "code",
         lang: "javascript",
-        code: `const res = await fetch("/api/users");\\nconst text = await res.text();\\nconsole.log(res.status, res.headers.get("content-type"));\\nconsole.log(text.slice(0, 200));\\nconst data = JSON.parse(text); // only after you know it is JSON`,
+        code: `const res = await fetch("/api/users");\nconst text = await res.text();\nconsole.log(res.status, res.headers.get("content-type"));\nconsole.log(text.slice(0, 200));\nconst data = JSON.parse(text); // only after you know it is JSON`,
       },
       {
         type: "list",
@@ -151,7 +151,7 @@ export const posts: Post[] = [
       {
         type: "code",
         lang: "javascript",
-        code: `async function fetchJson(url) {\\n  const res = await fetch(url);\\n  const text = await res.text();\\n  if (!res.ok) {\\n    throw new Error("Request failed: " + res.status + " " + res.statusText + " — " + text.slice(0, 200));\\n  }\\n  if (!res.headers.get("content-type")?.includes("application/json")) {\\n    throw new Error("Expected JSON, got: " + text.slice(0, 200));\\n  }\\n  return JSON.parse(text);\\n}`,
+        code: `async function fetchJson(url) {\n  const res = await fetch(url);\n  const text = await res.text();\n  if (!res.ok) {\n    throw new Error("Request failed: " + res.status + " " + res.statusText + " — " + text.slice(0, 200));\n  }\n  if (!res.headers.get("content-type")?.includes("application/json")) {\n    throw new Error("Expected JSON, got: " + text.slice(0, 200));\n  }\n  return JSON.parse(text);\n}`,
       },
       {
         type: "p",
@@ -588,7 +588,7 @@ export const posts: Post[] = [
       {
         type: "code",
         lang: "javascript",
-        code: `const pretty = '{\\n  "a": 1,\\n  "b": 2\\n}';\nconst minified = JSON.stringify(JSON.parse(pretty));\nconsole.log(minified); // {"a":1,"b":2}`,
+        code: `const pretty = '{\n  "a": 1,\n  "b": 2\n}';\nconst minified = JSON.stringify(JSON.parse(pretty));\nconsole.log(minified); // {"a":1,"b":2}`,
       },
       {
         type: "p",
@@ -936,7 +936,7 @@ export const posts: Post[] = [
       {
         type: "code",
         lang: "python",
-        code: `import yaml, json\\n\\nwith open("config.yaml") as f:\\n    data = yaml.safe_load(f)  # never yaml.load without a Loader — safe_load blocks arbitrary code execution\\n\\nprint(json.dumps(data, indent=2))`,
+        code: `import yaml, json\n\nwith open("config.yaml") as f:\n    data = yaml.safe_load(f)  # never yaml.load without a Loader — safe_load blocks arbitrary code execution\n\nprint(json.dumps(data, indent=2))`,
       },
       {
         type: "p",
@@ -946,13 +946,13 @@ export const posts: Post[] = [
       {
         type: "code",
         lang: "javascript",
-        code: `import yaml from "js-yaml";\\nimport { readFileSync } from "node:fs";\\n\\nconst data = yaml.load(readFileSync("config.yaml", "utf8"));\\nconsole.log(JSON.stringify(data, null, 2));`,
+        code: `import yaml from "js-yaml";\nimport { readFileSync } from "node:fs";\n\nconst data = yaml.load(readFileSync("config.yaml", "utf8"));\nconsole.log(JSON.stringify(data, null, 2));`,
       },
       { type: "h2", text: "yq on the command line" },
       {
         type: "code",
         lang: "bash",
-        code: `# one file to stdout\\nyq -o=json config.yaml\\n\\n# one file to disk\\nyq -o=json config.yaml > config.json\\n\\n# every manifest in a directory (the Kubernetes habit)\\nfor f in manifests/*.yaml; do\\n  yq -o=json "$f" > "\${f%.yaml}.json"\\ndone`,
+        code: `# one file to stdout\nyq -o=json config.yaml\n\n# one file to disk\nyq -o=json config.yaml > config.json\n\n# every manifest in a directory (the Kubernetes habit)\nfor f in manifests/*.yaml; do\n  yq -o=json "$f" > "\${f%.yaml}.json"\ndone`,
       },
       { type: "h2", text: "What gets lost in conversion" },
       {
@@ -972,7 +972,7 @@ export const posts: Post[] = [
       {
         type: "code",
         lang: "text",
-        code: `# PyYAML\\nfound character '\\t' that cannot start any token\\n\\n# js-yaml\\nbad indentation of a mapping entry`,
+        code: `# PyYAML\nfound character '\\t' that cannot start any token\n\n# js-yaml\nbad indentation of a mapping entry`,
       },
       {
         type: "p",
@@ -993,6 +993,62 @@ export const posts: Post[] = [
       {
         type: "p",
         text: "Paste the YAML into the [JSON / YAML / CSV Converter](https://byte-kit.dev/tools/json-yaml-csv) — it converts entirely in your browser, so configs with secrets never leave your device. If the JSON it produces looks wrong, [How to Format JSON in JavaScript](/posts/how-to-format-json-in-javascript/) shows how to validate and pretty-print it.",
+      },
+    ],
+  },
+  {
+    slug: "invisible-characters-breaking-your-code",
+    title: "Invisible Characters Are Breaking Your Code: How to Find and Remove Them",
+    excerpt:
+      "Zero-width spaces and hidden Unicode characters sneak in through copy-paste and silently break string comparisons, logins, and builds. Here is how to spot and strip them.",
+    date: "2026-10-16",
+    readingTime: "5 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "The code looks perfect. The string looks right. The test still fails. Before you question your sanity, consider that the bug might be a character you literally cannot see: a zero-width space that rode in on a copy-paste from a doc, a chat message, or a website. Invisible Unicode characters are one of the most annoying classes of bugs in programming, precisely because everything renders normally while nothing matches.",
+      },
+      { type: "h2", text: "The usual suspects" },
+      {
+        type: "list",
+        items: [
+          "Zero-width space (U+200B) — the most common. Copy-paste from web pages, Notion, Google Docs, or chat apps drops these into identifiers, passwords, and config values.",
+          "Zero-width joiner and non-joiner (U+200C, U+200D) — these glue emoji sequences together; outside emoji they are invisible noise.",
+          "Byte-order mark (U+FEFF) — sits at the very start of files saved as UTF-8 with BOM. Breaks shebangs, JSON parsers, and CSV headers.",
+          "Word joiner (U+2060) and soft hyphen (U+00AD) — inserted by word processors and rich-text editors to control line breaks.",
+          "Bidirectional control characters (U+202A to U+202E) — the dangerous ones. They can reorder how code displays in an editor, making malicious code look benign. This is the 'Trojan Source' attack (CVE-2021-42574); most linters and compilers now flag it.",
+        ],
+      },
+      { type: "h2", text: "How to find them" },
+      {
+        type: "p",
+        text: "Your eyes will not help — you need to inspect the code points, not the glyphs. In JavaScript, search for the known ranges, or dump the string as code points to see exactly what is in there:",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `// Detect the common invisible characters\nconst invisible = /[\\u200B-\\u200D\\u2060\\uFEFF\\u00AD]/;\ninvisible.test("pass\\u200Bword"); // true — a zero-width space hides after "pass"\n\n// See the code points, not the glyphs\n[..."na\\u200Bme"].map((ch) => "U+" + ch.codePointAt(0).toString(16).toUpperCase());\n// ["U+6E", "U+61", "U+200B", "U+6D", "U+65"] — the culprit is obvious now`,
+      },
+      { type: "h2", text: "The string-comparison trap" },
+      {
+        type: "p",
+        text: "This is the failure mode that costs people hours: two strings that render identically but are not equal. \"admin\" and \"admin\\u200B\" look the same in a log, in a diff, and in a database row — but === says false. Login forms, API keys pasted from dashboards, and unique constraints in databases all break this way. When a comparison fails and the two values look identical, check the code points before you rewrite the logic.",
+      },
+      { type: "h2", text: "How to remove them" },
+      {
+        type: "p",
+        text: "Once you know which characters to target, removal is one line. Strip the usual suspects with a regex, and treat the bidirectional controls separately — they have no legitimate use in source code or config, so flagging them is better than silently deleting them:",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `// Strip the usual suspects, keep normal text\nconst clean = (s) => s.replace(/[\\u200B-\\u200D\\u2060\\uFEFF\\u00AD]/g, "");\nclean("pass\\u200Bword"); // "password"\n\n// Bidirectional controls: warn loudly instead of silently stripping\nconst hasBidi = /[\\u202A-\\u202E\\u2066-\\u2069]/.test(s);\nif (hasBidi) throw new Error("Refusing input with bidi control characters");`,
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste suspicious text into the [Invisible Character Cleaner](https://byte-kit.dev/tools/invisible-character-cleaner) — it highlights every hidden character it finds and strips them locally in your browser, nothing uploaded. If the invisible characters are inside a pattern you are debugging, the [Regex Tester](https://byte-kit.dev/tools/regex-tester) shows matches live so you can see exactly where they sit.",
       },
     ],
   },

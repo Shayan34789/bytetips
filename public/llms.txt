@@ -18,6 +18,7 @@
 - [encodeURI vs encodeURIComponent: When to Use Each (and the Double-Encoding Trap)](https://bytetips.tech/posts/encodeuri-vs-encodeuricomponent/): encodeURI is for a whole URL, encodeURIComponent is for one value inside it — mix them up and you get broken links or %2520 double-encoding.
 - [How to Check If a JWT Is Expired (the exp Claim)](https://bytetips.tech/posts/how-to-check-if-jwt-is-expired/): Read the exp claim, compare it with the current time, and avoid the seconds-vs-milliseconds trap.
 - [How to Convert YAML to JSON: Python, Node, yq, and Online (Without Uploading Secrets)](https://bytetips.tech/posts/convert-yaml-to-json/): Parse YAML with yaml.safe_load, js-yaml, or yq -o=json — plus what gets lost: comments, anchors, and yes/no coercion.
+- [Invisible Characters Are Breaking Your Code: How to Find and Remove Them](https://bytetips.tech/posts/invisible-characters-breaking-your-code/): Zero-width spaces and hidden Unicode sneak in through copy-paste and silently break string comparisons, logins, and builds — here is how to spot and strip them.
 
 ## Tools
 

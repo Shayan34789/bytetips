@@ -19,6 +19,7 @@
 - [How to Check If a JWT Is Expired (the exp Claim)](https://bytetips.tech/posts/how-to-check-if-jwt-is-expired/): Read the exp claim, compare it with the current time, and avoid the seconds-vs-milliseconds trap.
 - [How to Convert YAML to JSON: Python, Node, yq, and Online (Without Uploading Secrets)](https://bytetips.tech/posts/convert-yaml-to-json/): Parse YAML with yaml.safe_load, js-yaml, or yq -o=json — plus what gets lost: comments, anchors, and yes/no coercion.
 - [Invisible Characters Are Breaking Your Code: How to Find and Remove Them](https://bytetips.tech/posts/invisible-characters-breaking-your-code/): Zero-width spaces and hidden Unicode sneak in through copy-paste and silently break string comparisons, logins, and builds — here is how to spot and strip them.
+- [HEX to RGB: How the Conversion Actually Works](https://bytetips.tech/posts/hex-to-rgb-how-conversion-works/): A hex color is three base-16 numbers — split into pairs, convert each to decimal, and watch out for the shorthand and alpha traps.
 
 ## Tools
 

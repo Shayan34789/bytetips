@@ -1052,6 +1052,74 @@ export const posts: Post[] = [
       },
     ],
   },
+  {
+    slug: "hex-to-rgb-how-conversion-works",
+    title: "HEX to RGB: How the Conversion Actually Works",
+    excerpt:
+      "A hex color is just three base-16 numbers for red, green, and blue. Split it into pairs, convert each pair to decimal, and you have RGB — plus the shorthand and alpha traps.",
+    date: "2026-10-17",
+    readingTime: "5 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: a hex color like #FF5733 is three numbers written in base 16 — FF red, 57 green, 33 blue. Split the hex into pairs, convert each pair from hexadecimal to decimal (0–255), and you get rgb(255, 87, 51). Same color, different notation. Everything else on this page is detail around that one idea.",
+      },
+      { type: "h2", text: "The 30-second conversion" },
+      {
+        type: "p",
+        text: "Take #FF5733 and split it after the #: FF | 57 | 33. Each pair is a hexadecimal number — two base-16 digits. Convert each pair with (first digit × 16) + second digit, where A=10 through F=15:",
+      },
+      {
+        type: "list",
+        items: [
+          "FF → 15 × 16 + 15 = 255 (red)",
+          "57 → 5 × 16 + 7 = 87 (green)",
+          "33 → 3 × 16 + 3 = 51 (blue)",
+        ],
+      },
+      {
+        type: "p",
+        text: "So #FF5733 is rgb(255, 87, 51). In code, the whole thing is six lines:",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `function hexToRgb(hex) {\n  hex = hex.replace("#", "");\n  const r = parseInt(hex.slice(0, 2), 16);\n  const g = parseInt(hex.slice(2, 4), 16);\n  const b = parseInt(hex.slice(4, 6), 16);\n  return { r, g, b };\n}\nhexToRgb("#FF5733"); // { r: 255, g: 87, b: 51 }\n\nfunction rgbToHex(r, g, b) {\n  return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");\n}\nrgbToHex(255, 87, 51); // "#ff5733"`,
+      },
+      { type: "h2", text: "Shorthand and alpha: the two variants" },
+      {
+        type: "p",
+        text: "Three-digit hex like #F00 is shorthand — each digit is doubled, so #F00 means #FF0000 (pure red). Eight-digit hex like #FF573380 adds an alpha channel as the last pair: 00 is fully transparent, FF is fully opaque. To get the CSS 0–1 alpha, divide by 255 — 80 hex is 128 decimal, so #FF573380 is rgba(255, 87, 51, 0.5).",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `// Expand 3-digit shorthand first\nfunction expand(hex) {\n  hex = hex.replace("#", "");\n  return hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;\n}\nexpand("F00"); // "FF0000"\n\n// 8-digit hex → rgba()\nconst alpha = parseInt("80", 16) / 255; // 0.5019…\n"rgba(255, 87, 51, " + alpha.toFixed(2) + ")"; // "rgba(255, 87, 51, 0.50)"`,
+      },
+      { type: "h2", text: "The traps" },
+      {
+        type: "list",
+        items: [
+          "parseInt without a radix: parseInt(\"FF\") returns NaN, because without the second argument it parses as decimal. Always write parseInt(pair, 16).",
+          "Forgetting the #: split \"#FF5733\" into pairs without removing it first and every channel shifts — all three values come out wrong.",
+          "Using shorthand raw: #F00 is not red=15, green=0, blue=0 — it is #FF0000. Double each digit before converting.",
+          "Reading alpha as 0–100: in 8-digit hex the alpha pair is 00–FF like any other channel. FF means 255/255 = 1, fully opaque. Divide by 255 for the CSS value.",
+          "Assuming the color changed: conversion only renames the value. If the swatch looks different after converting, the bug is in your code, not the math.",
+        ],
+      },
+      { type: "h2", text: "When you actually need RGB" },
+      {
+        type: "p",
+        text: "For plain CSS, hex is fine and shorter. RGB earns its keep in three places: canvas and WebGL APIs, which hand you decimal channel arrays (getImageData returns 0–255 values); color math like blending or darkening, which is arithmetic on channels; and transparency — rgba(255, 87, 51, 0.5) works everywhere, while 8-digit hex still trips up older browsers and some design tools.",
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste any hex into the [Color Converter](https://byte-kit.dev/tools/color-converter) — it shows the RGB, HSL, and a live preview instantly, all in your browser with nothing uploaded.",
+      },
+    ],
+  },
 ];
 
 export const getPost = (slug: string) => posts.find((post) => post.slug === slug);

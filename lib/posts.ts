@@ -1120,6 +1120,738 @@ export const posts: Post[] = [
       },
     ],
   },
+{
+  slug: "how-to-convert-image-to-base64",
+  title: "How to Convert an Image to Base64 (Data URI)",
+  excerpt:
+    "A data URI embeds an image's bytes directly in HTML or CSS as data:image/png;base64,... — perfect for tiny icons, terrible for photos. Here is when to use it and when to skip it.",
+  date: "2026-10-17",
+  readingTime: "6 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: a data URI is the image's raw bytes, base64-encoded, pasted straight into your HTML or CSS as data:image/png;base64,iVBORw0KGgo.... You can make one with an online converter or in the browser with FileReader.readAsDataURL. It saves an HTTP request but inflates the image by about 33% — so it is a win for tiny icons and a loss for photos.",
+    },
+    { type: "h2", text: "What a data URI actually is" },
+    {
+      type: "p",
+      text: "The format is data:[mime type];base64,[encoded bytes]. The mime type tells the browser what the bytes are — image/png, image/jpeg, image/webp, or image/svg+xml — and everything after the comma is the base64 payload. The browser decodes it exactly as if it had downloaded a file, except there is no download: the bytes are already in the document.",
+    },
+    { type: "h2", text: "Make one in the browser" },
+    {
+      type: "p",
+      text: "No server needed. FileReader.readAsDataURL reads a file and hands you the complete data URI, prefix included:",
+    },
+    {
+      type: "code",
+      lang: "javascript",
+      code: `function imageToDataUri(file) {\n  return new Promise((resolve, reject) => {\n    const reader = new FileReader();\n    reader.onload = () => resolve(reader.result);\n    reader.onerror = () => reject(reader.error);\n    reader.readAsDataURL(file);\n  });\n}\n\n// Wire it to a file input\nconst input = document.querySelector("#upload");\ninput.addEventListener("change", async (e) => {\n  const uri = await imageToDataUri(e.target.files[0]);\n  document.querySelector("#preview").src = uri; // "data:image/png;base64,..."\n});`,
+    },
+    { type: "h2", text: "When it helps" },
+    {
+      type: "list",
+      items: [
+        "Tiny icons and logos: saving one HTTP request outweighs the 33% size penalty when the file is a few kilobytes.",
+        "Email signatures: many email clients block external images until the reader allows them — an embedded data URI renders immediately.",
+        "Single-file HTML: demos, reports, and saved pages that must work with no external assets.",
+        "Blur-up placeholders: embed a tiny low-res preview that shows instantly while the full image loads.",
+      ],
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "The 33% bloat is real: base64 turns every 3 bytes into 4 characters. A 300 KB photo becomes 400 KB of text inside your HTML.",
+        "No separate caching: the image is re-downloaded every time the HTML or CSS file changes, even if the image did not.",
+        "Large data URIs delay rendering: the browser must parse all that text before it can lay out the page.",
+        "Hard to edit: the image is buried in code, invisible to asset pipelines and image optimizers.",
+      ],
+    },
+    { type: "h2", text: "Prefer plain SVG for icons" },
+    {
+      type: "p",
+      text: "If the icon is a vector, skip base64 entirely and inline the SVG as plain text. It is smaller than the base64 version, you can style it with CSS (fill, stroke, currentColor), and there is nothing to decode. Base64 only wins when the source is already a raster image you cannot replace.",
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Drop an image into the [Image to Base64](https://byte-kit.dev/tools/image-to-base64) converter and copy the data URI — everything runs in your browser, nothing is uploaded.",
+    },
+  ],
+},
+{
+  slug: "uuid-v4-vs-uuid-v7",
+  title: "UUID v4 vs v7: Which Should You Use?",
+  excerpt:
+    "UUID v4 is 122 bits of pure randomness; v7 starts with a millisecond timestamp so IDs sort by creation time. Use v4 by default, v7 for database primary keys.",
+  date: "2026-10-17",
+  readingTime: "6 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: use v4 for everyday unique IDs and v7 for database primary keys. A v4 UUID is 122 bits of randomness with no order at all; a v7 UUID starts with a 48-bit Unix timestamp in milliseconds, so IDs sort by creation time. Both are standardized in RFC 9562 (2024), and you can tell them apart by the 13th hex digit — a 4 means v4, a 7 means v7.",
+    },
+    { type: "h2", text: "What is inside each version" },
+    {
+      type: "p",
+      text: "A v4 UUID fills 122 of its 128 bits with random data from a cryptographic generator. There is no timestamp, no machine identifier, nothing to read — that is the point. A v7 UUID spends its first 48 bits on the current Unix time in milliseconds, then fills the remaining 74 bits with randomness. Collisions are a non-issue for both: v4 has about 5.3 × 10³⁶ possible values, and v7 has about 1.9 × 10²² unique values per millisecond on top of the timestamp separating every millisecond.",
+    },
+    { type: "h2", text: "The database problem v7 solves" },
+    {
+      type: "p",
+      text: "PostgreSQL, MySQL, and most relational databases index primary keys with B-trees, which love sequential inserts: each new row appends to the end of the index. A v4 primary key lands at a random position on every insert, causing page splits and a fragmented index that degrades write throughput and cache locality at scale. A v7 primary key starts with a timestamp, so new IDs are monotonically increasing and inserts append cleanly — the write pattern databases want, with no central coordinator the way auto-increment needs.",
+    },
+    { type: "h2", text: "Generate one in JavaScript" },
+    {
+      type: "p",
+      text: "v4 is built into every modern browser and Node.js — no library needed. v7 is newer, so it still needs a library:",
+    },
+    {
+      type: "code",
+      lang: "javascript",
+      code: `// v4 — built in, no install\ncrypto.randomUUID(); // "3b241101-e2bb-4d53-af18-1c9a2d80a910"\n\n// v7 — needs the uuid package (v11+)\nimport { v7 as uuidv7 } from "uuid";\nuuidv7(); // "018f3f5e-1c2d-7a9b-8f10-3c4d5e6f7a8b"`,
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Leaking creation time: a v7 ID embeds a millisecond timestamp, so anyone can read roughly when the resource was created. If that reveals something sensitive, stick with v4.",
+        "Expecting exact ordering: IDs generated in the same millisecond share a timestamp, so v7 gives time grouping, not a strict sequence. Need exact order? Keep an explicit timestamp or sequence column.",
+        "Using UUIDs as secrets: UUIDs are unique, not unguessable-by-design. For access tokens, use a random byte string from a CSPRNG with an expiry and a way to revoke it.",
+        "Migrating existing v4 keys: the v7 win is for new tables. Rewriting the primary keys of a live table is rarely worth the trouble.",
+      ],
+    },
+    { type: "h2", text: "The rule of thumb" },
+    {
+      type: "p",
+      text: "v4 by default — ad-hoc identifiers, idempotency keys, filenames, anything where order does not matter. v7 for database primary keys and records you want roughly time-ordered without a separate timestamp column. And if you need the same input to always produce the same ID, that is v5, not v4 or v7.",
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Generate UUID v4s and secure passwords with the [Password & UUID Generator](https://byte-kit.dev/tools/password-uuid-generator) — everything runs locally in your browser.",
+    },
+  ],
+},
+{
+  slug: "how-to-reduce-svg-file-size",
+  title: "How to Reduce SVG File Size",
+  excerpt:
+    "Most SVG bloat is decimal precision, editor metadata, and unused definitions. Run SVGO and you will typically cut 30–70% with zero visual change.",
+  date: "2026-10-17",
+  readingTime: "6 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: run SVGO — npx svgo logo.svg -o logo.min.svg — and you will typically cut 30–70% with zero visual change. Most SVG bloat is not the artwork: it is decimal precision with six places, editor metadata from Illustrator or Figma, and gradient definitions nothing references.",
+    },
+    { type: "h2", text: "SVGO in one command" },
+    {
+      type: "p",
+      text: "SVGO is the standard optimizer: a pipeline of plugins that each remove one category of bloat. You do not even need to install it — npx runs it once and forgets it:",
+    },
+    {
+      type: "code",
+      lang: "bash",
+      code: `# Optimize a single file\nnpx svgo logo.svg -o logo.min.svg\n\n# A typical Illustrator export:\n# logo.svg      → 38.4 KB\n# logo.min.svg  → 11.2 KB  (70.8% smaller, looks identical)`,
+    },
+    { type: "h2", text: "Precision is the #1 lever" },
+    {
+      type: "p",
+      text: "The single biggest source of bloat is numeric precision. A path point written as 12.345678 is visually identical to 12.35 at any normal size, but costs four extra characters — multiplied across hundreds of points. SVGO's floatPrecision option controls this: 2 decimals is a safe starting point, 1 is fine for simple icons, and detailed illustrations may need 3. If curves start looking wobbly, you went too far.",
+    },
+    { type: "h2", text: "The easy wins SVGO handles" },
+    {
+      type: "list",
+      items: [
+        "Editor metadata: Illustrator, Inkscape, and Figma namespaces plus generator comments — useful to the editor, dead weight on the web.",
+        "Unused definitions: gradients, filters, and clip paths that nothing in the file references.",
+        "Collapsed groups: nested <g> elements with no meaningful attributes get merged away.",
+        "Shortened IDs and cleaned path data: absolute coordinates become relative where shorter, and redundant commands are dropped.",
+      ],
+    },
+    { type: "h2", text: "Dedupe repeated shapes with <use>" },
+    {
+      type: "p",
+      text: "When the same shape repeats — icon sets, dot patterns, repeated logos — define it once in <defs> and reference it. The savings compound with every duplicate:",
+    },
+    {
+      type: "code",
+      lang: "html",
+      code: `<defs>\n  <circle id="dot" r="5" fill="#F00" />\n</defs>\n<use href="#dot" x="10" y="10" />\n<use href="#dot" x="30" y="10" />\n<use href="#dot" x="50" y="10" />`,
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Letting SVGO strip the viewBox: without a viewBox the SVG cannot scale responsively. Keep removeViewBox off unless the SVG is sized only by width and height attributes.",
+        "Rounding too aggressively: floatPrecision 1 on a detailed illustration turns smooth curves wobbly. Start at 2 and drop to 1 only for simple icons.",
+        "Optimizing your only copy: minified SVGs are miserable to edit. Keep the source file and optimize on export.",
+        "Merging paths across different styles: mergePaths only saves when adjacent paths share the same fill — merging across opacities or strokes changes how it renders.",
+        "Skipping the visual check: always compare before and after in a browser, at 1x and 2x zoom, before shipping.",
+      ],
+    },
+    { type: "h2", text: "Compress on the server too" },
+    {
+      type: "p",
+      text: "SVG is text, and text compresses extremely well — gzip or brotli on the server shrinks the transfer size far beyond what SVGO alone does.",
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Drop an SVG into the [SVG Optimizer](https://byte-kit.dev/tools/svg-optimizer) to strip the bloat in your browser — no install, no upload.",
+    },
+  ],
+},
+{
+  slug: "how-to-create-a-favicon",
+  title: "How to Create a Favicon for Your Website",
+  excerpt:
+    "One square source image, four sizes, three link tags: 16 and 32px for tabs, 180px for Apple touch icons, 192 and 512px for PWAs.",
+  date: "2026-10-17",
+  readingTime: "5 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: start from one square source image and export it at 16x16 and 32x32 for browser tabs, 180x180 for Apple touch icons, and 192x192 plus 512x512 if you ship a PWA. Link the files in your HTML head and keep a favicon.ico at your site root. That covers nearly every browser and device with three link tags.",
+    },
+    { type: "h2", text: "The sizes you actually need" },
+    {
+      type: "list",
+      items: [
+        "16x16 and 32x32 — browser tabs and bookmarks. The 32px version covers high-density displays.",
+        "180x180 — apple-touch-icon.png, used when someone adds your site to their iOS home screen.",
+        "192x192 and 512x512 — referenced from your web app manifest for installable PWAs.",
+        "favicon.ico at the site root — browsers still request this file automatically, so ship it even when you link everything explicitly.",
+      ],
+    },
+    { type: "h2", text: "ICO vs PNG vs SVG" },
+    {
+      type: "p",
+      text: "ICO is a container format that can hold several sizes in one file, which is why favicon.ico remains the safest default for tabs. PNG is the right choice for the apple-touch-icon and the PWA icons — it is universally supported and easy to generate. SVG scales infinitely and stays tiny for simple marks, but not every browser supports SVG favicons, so always ship a PNG or ICO fallback alongside it.",
+    },
+    { type: "h2", text: "The minimal HTML" },
+    {
+      type: "p",
+      text: "Place the files at your site root and add this to your <head>:",
+    },
+    {
+      type: "code",
+      lang: "html",
+      code: `<link rel="icon" href="/favicon.ico" sizes="32x32">\n<link rel="icon" href="/icon.svg" type="image/svg+xml">\n<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Aggressive caching: browsers hold onto favicons for weeks. After an update, bump a query string (/favicon.ico?v=2) so visitors actually see the new icon.",
+        "Transparency on apple-touch-icon: iOS fills transparent areas with black. Export the 180x180 with a solid background.",
+        "Detail that dies at 16px: a full logo becomes a smudge in a tab. Design for the smallest size first — one bold shape, high contrast, no text.",
+        "Missing root favicon.ico: browsers request /favicon.ico on their own. If it is not there, you get 404 noise in your server logs.",
+        "SVG-only setups: fine where supported, but without a PNG or ICO fallback some visitors get no icon at all.",
+      ],
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Upload your logo to the [Favicon Generator](https://byte-kit.dev/tools/favicon-generator) — it exports every size plus the HTML snippet, all in your browser with nothing uploaded.",
+    },
+  ],
+},
+{
+  slug: "how-to-convert-json-to-csv",
+  title: "How to Convert JSON to CSV (Python, jq, and Online)",
+  excerpt:
+    "JSON converts cleanly to CSV when it is an array of flat objects — here is the Python, pandas, and jq for it, plus what to do with nested data.",
+  date: "2026-10-17",
+  readingTime: "6 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: JSON converts cleanly to CSV when it is an array of flat objects — each object becomes a row, each key becomes a column. In Python it is ten lines with the csv module, and on the command line it is a single jq invocation. The only real work is nested data, which CSV cannot represent directly.",
+    },
+    { type: "h2", text: "The shape that converts cleanly" },
+    {
+      type: "p",
+      text: "CSV is two-dimensional: rows and columns, nothing else. The JSON shape that maps onto it without decisions is an array of objects with the same flat keys:",
+    },
+    {
+      type: "code",
+      lang: "javascript",
+      code: `[\n  { "id": 1, "name": "Alice", "role": "admin" },\n  { "id": 2, "name": "Bob", "role": "editor" }\n]\n// becomes:\n// id,name,role\n// 1,Alice,admin\n// 2,Bob,editor`,
+    },
+    { type: "h2", text: "Python: csv.DictWriter" },
+    {
+      type: "p",
+      text: "For flat records, the standard library is all you need. This assumes the data is a list of dicts with uniform keys:",
+    },
+    {
+      type: "code",
+      lang: "python",
+      code: `import json, csv\n\nwith open("data.json") as f:\n    data = json.load(f)\n\nwith open("out.csv", "w", newline="") as f:\n    writer = csv.DictWriter(f, fieldnames=data[0].keys())\n    writer.writeheader()\n    writer.writerows(data)`,
+    },
+    { type: "h2", text: "Nested data: pandas json_normalize" },
+    {
+      type: "p",
+      text: "When objects contain objects, flatten them first. json_normalize turns nested keys into dot-notation columns:",
+    },
+    {
+      type: "code",
+      lang: "python",
+      code: `import pandas as pd\n\ndata = [\n    {"id": 1, "user": {"name": "Alice", "city": "NYC"}},\n    {"id": 2, "user": {"name": "Bob", "city": "SF"}},\n]\n\ndf = pd.json_normalize(data, sep=".")\ndf.to_csv("out.csv", index=False)\n# id,user.name,user.city\n# 1,Alice,NYC\n# 2,Bob,SF`,
+    },
+    { type: "h2", text: "The jq one-liner" },
+    {
+      type: "p",
+      text: "On the command line, jq handles the whole job — headers included:",
+    },
+    {
+      type: "code",
+      lang: "bash",
+      code: `jq -r '(.[0] | keys_unsorted) as $k | $k, map([.[ $k[] ]])[] | @csv' data.json > out.csv`,
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Nested objects don't fit: CSV has no nesting. Flatten with json_normalize first, or the converter joins the object into a single unreadable cell.",
+        "Non-uniform keys: if some records have fields others lack, collect every key across all records before writing — otherwise columns silently disappear.",
+        "Commas inside values: a value like \"Boston, MA\" must be quoted. DictWriter, pandas, and @csv all do this automatically; a hand-rolled string join does not.",
+        "Forgetting newline=\"\" in Python: on Windows, the csv module without it writes a blank line after every row.",
+        "Excel showing one column: in some locales Excel expects semicolons, not commas. If everything lands in a single column, the delimiter is the problem — not your data.",
+      ],
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Paste your JSON into the [JSON / YAML / CSV](https://byte-kit.dev/tools/json-yaml-csv) — it converts in your browser with nothing uploaded, and shows you exactly how nested fields get flattened.",
+    },
+  ],
+},
+{
+  slug: "glassmorphism-css-effect",
+  title: "How to Create the Glassmorphism Effect with CSS",
+  excerpt:
+    "Five CSS properties make the frosted-glass look: a translucent background, backdrop-filter blur and saturate, a thin light border, rounded corners, and a soft shadow.",
+  date: "2026-10-17",
+  readingTime: "5 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: glassmorphism is five CSS properties on a panel — a translucent rgba() background, backdrop-filter with blur() and saturate(), a thin light border, rounded corners, and a soft shadow — placed over a colorful background. The blur does the frosted-glass work; everything else sells the illusion.",
+    },
+    { type: "h2", text: "The recipe" },
+    {
+      type: "code",
+      lang: "css",
+      code: `.glass {\n  background: rgba(255, 255, 255, 0.15);\n  -webkit-backdrop-filter: blur(12px) saturate(160%);\n  backdrop-filter: blur(12px) saturate(160%);\n  border: 1px solid rgba(255, 255, 255, 0.3);\n  border-radius: 16px;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n}`,
+    },
+    {
+      type: "p",
+      text: "Each property has a job: the translucent background lets the page show through; blur() frosts whatever sits behind the panel (not the panel's own content); saturate() keeps the blurred colors vivid instead of washing out to grey; the 1px light border catches the edge like the rim of real glass; and the radius plus shadow lift the panel off the page. The -webkit- prefix is still needed for older Safari versions.",
+    },
+    { type: "h2", text: "It only works over a real background" },
+    {
+      type: "p",
+      text: "On a flat solid color the blur has nothing to frost, so the effect vanishes and you are left with a grey translucent box. Glassmorphism needs a gradient, a photo, or a pattern behind it. Test your panel over the busiest background your page has — if the glass reads there, it reads anywhere.",
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Skipping saturate(): blur() alone washes colors out to grey. saturate(150–180%) is what keeps frosted glass vivid.",
+        "Forgetting -webkit-backdrop-filter: older Safari versions need the prefix — without it the panel is just a translucent box there.",
+        "Text that fails contrast: a translucent panel over a changing background can drop below readable contrast. Test over the brightest and darkest parts of the backdrop, or add a subtle text shadow.",
+        "Too many blurred panels: backdrop-filter is one of the more expensive CSS properties. A few panels are fine; dozens will make scrolling stutter, especially on low-end phones.",
+        "Glass over a flat background: with nothing colorful behind it there is no frosted effect — just a grey box.",
+      ],
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Dial in the blur, tint, and border on the [Glassmorphism Generator](https://byte-kit.dev/tools/glassmorphism-generator) and copy the finished CSS — it runs entirely in your browser.",
+    },
+  ],
+},
+{
+  slug: "how-to-convert-avif-to-jpg",
+  title: "How to Convert AVIF to JPG",
+  excerpt:
+    "AVIF files are 30–50% smaller than JPG but won't open everywhere — here's how to convert them (including batch) and what happens to transparency.",
+  date: "2026-10-17",
+  readingTime: "5 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: open the .avif in a browser-based converter and download the JPG — no install, nothing uploaded. On a Mac you can also open it in Preview and use File → Export → JPEG. The only real decisions are the JPG quality (80–90 is the sweet spot) and the background color, because JPG has no transparency.",
+    },
+    { type: "h2", text: "What AVIF is, and why you have one" },
+    {
+      type: "p",
+      text: "AVIF is an image format built on the AV1 video codec — the compression technology behind modern video streaming, applied to still images. It stores photos 30–50% smaller than JPG at the same visual quality, which is why CDNs serve it and some cameras and apps save in it. Chrome, Firefox, and Safari all open AVIF now, so the files usually arrive quietly — a download or a saved image that picked the format the site served.",
+    },
+    { type: "h2", text: "Why convert to JPG at all" },
+    {
+      type: "p",
+      text: "Because the rest of the world hasn't caught up. Older desktop editors, upload forms that whitelist file extensions, office software, and print pipelines often don't recognize .avif — the file won't open, or the form rejects it outright. JPG is the universal fallback: everything reads it, everywhere.",
+    },
+    { type: "h2", text: "The three ways to convert" },
+    {
+      type: "list",
+      items: [
+        "Browser converter: drop the file in, pick a JPG quality, download. The conversion runs locally in your browser — nothing is uploaded, which matters for personal photos.",
+        "Mac Preview: open the .avif, then File → Export and choose JPEG. Built in on recent macOS, no extra software needed.",
+        "Windows: the Photos app needs the AV1 Video Extension from the Microsoft Store to open AVIF at all. If you'd rather not install it, the browser route skips the problem entirely.",
+      ],
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Transparency silently becomes a color: JPG has no alpha channel, so transparent pixels get filled — usually white. If your AVIF has transparency that matters (a logo, an icon), pick the background fill deliberately — or convert to PNG instead.",
+        "Quality 100: enormous files with no visible gain over 90. 80–90 is the sweet spot.",
+        "Converting one file at a time: queue every AVIF and download a single ZIP instead of repeating the same steps per file.",
+        "Converting for a website: you may not need to — serve AVIF with a JPG fallback (see below) and let the browser choose.",
+      ],
+    },
+    { type: "h2", text: "Batch it — and a fallback for the web" },
+    {
+      type: "p",
+      text: "Converting one file at a time gets old fast. Queue every AVIF at once and download the results as a single ZIP. And if you're putting images on a website rather than converting for compatibility, you may not need to convert at all — serve AVIF with a JPG fallback and let the browser choose:",
+    },
+    {
+      type: "code",
+      lang: "html",
+      code: `<picture>\n  <source srcset="photo.avif" type="image/avif">\n  <img src="photo.jpg" alt="A photo that works everywhere">\n</picture>`,
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Drop your .avif files into the [AVIF Converter](https://byte-kit.dev/tools/avif-converter) — batch conversion, quality control, and a background fill for transparency, all in your browser with nothing uploaded.",
+    },
+  ],
+},
+{
+  slug: "css-box-shadow-explained",
+  title: "How to Use CSS box-shadow (Every Value Explained)",
+  excerpt:
+    "box-shadow takes offset-x, offset-y, blur, spread, color, and an optional inset — here's what each value does, plus copy-paste recipes and the traps.",
+  date: "2026-10-17",
+  readingTime: "5 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); — horizontal offset, vertical offset, blur radius, color. That's 90% of what you'll ever write. The full syntax adds an optional spread radius and an inset keyword, and you can stack several shadows with commas.",
+    },
+    { type: "h2", text: "Each value, in plain English" },
+    {
+      type: "list",
+      items: [
+        "offset-x (required): how far the shadow sits left or right of the element. Positive pushes it right.",
+        "offset-y (required): how far it sits up or down. Positive pushes it down.",
+        "blur-radius (optional): how soft the shadow's edge is. 0 gives a hard, crisp edge.",
+        "spread-radius (optional): how much the shadow grows or shrinks beyond the element's box. Positive makes it bigger all around.",
+        "color (optional): any CSS color. Leave it out and the shadow uses your text color — which surprises everyone the first time.",
+        "inset (optional): flips the shadow inside the element instead of outside it.",
+      ],
+    },
+    {
+      type: "code",
+      lang: "css",
+      code: `.card {\n  /* offset-x | offset-y | blur | spread | color */\n  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);\n}`,
+    },
+    { type: "h2", text: "Stacking multiple shadows" },
+    {
+      type: "p",
+      text: "Separate shadows with commas — the first one in the list renders on top. Layering a small tight shadow under a large soft one is how you get depth that looks real instead of a single grey smudge:",
+    },
+    {
+      type: "code",
+      lang: "css",
+      code: `.card {\n  box-shadow:\n    0 1px 2px rgba(0, 0, 0, 0.08),\n    0 8px 24px rgba(0, 0, 0, 0.12);\n}`,
+    },
+    { type: "h2", text: "Inset: shadows on the inside" },
+    {
+      type: "p",
+      text: "Put inset first and the shadow draws inside the element's frame — pressed buttons, sunken form fields, inner depth on cards:",
+    },
+    {
+      type: "code",
+      lang: "css",
+      code: `.button:active {\n  /* shadow moves inside: the button looks pressed */\n  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);\n}`,
+    },
+    { type: "h2", text: "Two recipes to copy" },
+    {
+      type: "code",
+      lang: "css",
+      code: `/* Subtle card lift */\n.card {\n  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);\n  transition: box-shadow 0.2s ease, transform 0.2s ease;\n}\n.card:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);\n}\n\n/* Soft glow */\n.glow {\n  box-shadow: 0 0 24px rgba(59, 130, 246, 0.45);\n}`,
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Color left out: with no color, the shadow takes your text color. Black text gives a black shadow — usually not what you wanted. Set the color explicitly.",
+        "Blur of 0 looks broken: box-shadow: 4px 4px 0 black is a hard offset block, not a soft shadow. A valid style, but rarely the one people meant.",
+        "Clipped by overflow: a parent with overflow: hidden cuts the shadow off at its edges. If your shadow vanishes, check the ancestors.",
+        "No layout space: shadows paint outside the element without moving anything — neighbors won't make room, so large blurs can overlap surrounding content.",
+        "Heavy blurs everywhere: big blur radii on dozens of elements cost paint performance. Keep decorative shadows modest.",
+      ],
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Dial in the exact shadow visually with the [Box Shadow Generator](https://byte-kit.dev/tools/box-shadow-generator) — offsets, blur, spread, and color with a live preview, then copy the CSS straight into your stylesheet.",
+    },
+  ],
+},
+{
+  slug: "batch-convert-png-to-jpg",
+  title: "How to Convert Multiple PNGs to JPG at Once",
+  excerpt:
+    "Drop a folder of PNGs into a batch converter at quality 80–90 and watch gigabytes become megabytes — with the transparency and quality traps to avoid.",
+  date: "2026-10-17",
+  readingTime: "5 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: drop the whole folder into a batch converter, set JPG quality to 80–90, and download the results as a ZIP. A screenshot folder measured in gigabytes comes back as megabytes — for photos and screenshots, JPG runs 60–90% smaller than PNG with no visible difference.",
+    },
+    { type: "h2", text: "Why the files shrink so much" },
+    {
+      type: "p",
+      text: "PNG is lossless: it stores every pixel exactly, which is perfect for sharp graphics but wasteful for photos. JPG is lossy: it throws away visual detail your eyes barely register. On screenshots and photographs the two look identical at quality 85 — but the JPG is a fraction of the size.",
+    },
+    { type: "h2", text: "The transparency trade" },
+    {
+      type: "p",
+      text: "JPG has no alpha channel, so anything transparent gets filled with a solid color — usually white. That's fine for screenshots and photos, which have no transparency anyway. But logos and icons with transparent backgrounds come back with a white box around them. If transparency matters, keep the PNG.",
+    },
+    { type: "h2", text: "The quality sweet spot" },
+    {
+      type: "list",
+      items: [
+        "90 and up: screenshots with small text. Keeps letter edges crisp.",
+        "80–85: photos. Visually identical to the original, much smaller files.",
+        "Below 70: only when a file has to squeeze under an upload limit. Expect visible artifacts.",
+        "100: pointless. Enormous files, no visible gain over 90.",
+      ],
+    },
+    { type: "h2", text: "Keep it local" },
+    {
+      type: "p",
+      text: "Screenshots often contain personal information — chats, account numbers, open tabs. A converter that runs entirely in your browser never uploads them anywhere. You can prove it: load the page, switch to airplane mode, and convert. If it still works, your files never left your device.",
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "White boxes on logos: converting a transparent PNG fills the alpha with white. Check the results before you ship them.",
+        "Re-compressing JPGs: every JPG save throws away more detail. Always convert from the original PNG — never JPG to JPG to JPG.",
+        "Tiny PNGs barely shrink: flat-color graphics and icons are already small. Batch conversion pays off on photos and screenshots, not 2 KB icons.",
+        "Forgetting the originals: conversion is one-way for the discarded detail. Keep the PNGs until you're sure the JPGs are good.",
+      ],
+    },
+    {
+      type: "code",
+      lang: "bash",
+      code: `# ImageMagick: convert every PNG in the folder at quality 85\nmogrify -format jpg -quality 85 *.png\n# Originals are kept — new .jpg files appear alongside them`,
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Drop a whole folder into the [Batch Image Converter](https://byte-kit.dev/tools/batch-image-converter) — set the quality, convert everything at once, and download the results as a ZIP, all in your browser with nothing uploaded.",
+    },
+  ],
+},
+{
+  slug: "how-to-write-better-ai-prompts",
+  title: "How to Write Better AI Prompts (a Reusable Template)",
+  excerpt:
+    "Most bad AI output comes from vague input — the Role + Goal + Context + Output formula fixes it with four lines of structure.",
+  date: "2026-10-17",
+  readingTime: "5 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: bad AI output is almost always vague input. Use the Role + Goal + Context + Output formula — tell the model who it is, what you want, what it needs to know, and what the answer should look like. Four short lines of structure are the difference between a generic paragraph and exactly the thing you asked for.",
+    },
+    { type: "h2", text: "The formula" },
+    {
+      type: "p",
+      text: "Each part fixes one failure mode. Role sets the perspective and vocabulary — a senior copywriter writes differently than a generic assistant. Goal states the one concrete thing you want; keep it to one goal per prompt, because three requests get three half-answers. Context is the material the model cannot guess: your audience, your constraints, your examples. Output pins down the shape of the answer — length, format, tone — so you don't get an essay when you needed bullets.",
+    },
+    { type: "h2", text: "The template" },
+    {
+      type: "p",
+      text: "Copy this, fill in the brackets, and you have a solid prompt for almost any task:",
+    },
+    {
+      type: "list",
+      items: [
+        "Role: You are a [job title or expert type, e.g. senior technical writer].",
+        "Goal: [One concrete task, e.g. rewrite this paragraph for clarity.]",
+        "Context: [Audience, background, and any material — paste it here.]",
+        "Output: [Format and length, e.g. 150 words, three bullets, friendly tone.]",
+      ],
+    },
+    { type: "h2", text: "Weak vs strong: the same task" },
+    {
+      type: "p",
+      text: "Watch what the formula does to one task — writing a product description for wireless headphones:",
+    },
+    {
+      type: "list",
+      items: [
+        "Weak: \"Write a product description for our headphones.\" You get a generic paragraph that could describe any headphones ever made.",
+        "Strong: \"Role: you are a copywriter for an audio brand. Goal: write a product description for wireless headphones. Context: the audience is commuters; key features are 40-hour battery and noise cancelling; tone is casual. Output: 80 words, one headline, three bullets.\" You get a description shaped to the brief.",
+      ],
+    },
+    { type: "h2", text: "Constraints sharpen output" },
+    {
+      type: "p",
+      text: "The Output line does most of the work. Models fill whatever space you leave open, so close it: give a word count, a format, and a tone. \"Under 200 words\", \"as a two-column table\", \"no jargon\" — each constraint removes a whole class of bad output. And when the first answer is close but not right, don't rewrite the prompt from scratch. Iterate with a follow-up instead: \"Shorter. Drop the second bullet. Make the opening more direct.\" Follow-ups build on context the model already has, which is faster and usually better than starting over.",
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Skipping context: the model cannot know your audience, your product, or your constraints. If you didn't say it, it guessed — and guesses are generic.",
+        "Three goals in one prompt: ask for a summary, a critique, and a rewrite at once and you get three shallow answers. One prompt, one goal.",
+        "No output format: without a length and a shape, you get whatever length the model feels like. \"Brief\" is not a length — use a number.",
+        "Rewriting instead of iterating: if the answer is 80% right, a follow-up (\"make it shorter and friendlier\") beats a brand-new prompt.",
+        "Prompting in a vacuum: paste the actual material — the paragraph, the data, the example you like. The model works with what you give it.",
+      ],
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Build your next prompt with the [Prompt Template Generator](https://byte-kit.dev/tools/prompt-template-generator) — fill in the Role, Goal, Context, and Output slots and copy the finished prompt, all in your browser.",
+    },
+  ],
+},
+{
+  slug: "webp-vs-jpeg",
+  title: "WebP vs JPEG: Which Image Format Should You Use?",
+  excerpt:
+    "WebP is 25–35% smaller than JPEG at the same quality and works in 97%+ of browsers — but JPEG still wins for email, print, and legacy software.",
+  date: "2026-10-17",
+  readingTime: "5 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: for images on the web, use WebP — it is 25–35% smaller than JPEG at the same visual quality, supports transparency and animation, and works in 97%+ of browsers. Keep JPEG for email attachments, print, and old software that only speaks JPEG.",
+    },
+    { type: "h2", text: "Why WebP wins on the web" },
+    {
+      type: "p",
+      text: "WebP was built for the web; JPEG was built in 1992 for maximum compatibility. At the same visual quality, a WebP photo runs 25–35% smaller than the JPEG, which means faster page loads and less bandwidth. WebP also does two things JPEG simply cannot: transparency (an alpha channel, like PNG) and animation (as a lighter GIF replacement). Browser support is no longer the catch it once was — every current browser has supported WebP for years, covering over 97% of users.",
+    },
+    { type: "h2", text: "When JPEG still wins" },
+    {
+      type: "p",
+      text: "Compatibility is JPEG's superpower. Email clients, printers, and plenty of desktop software either don't render WebP or handle it badly. If the image has to open correctly anywhere — an email attachment, a print shop, a client's decade-old CMS — JPEG is the safe choice. JPEG is also the better archival format: keep your originals as JPEG or PNG, and treat WebP as the delivery format you generate from them.",
+    },
+    { type: "h2", text: "Side by side" },
+    {
+      type: "list",
+      items: [
+        "File size: WebP is 25–35% smaller than JPEG at the same visual quality.",
+        "Transparency: WebP yes (alpha channel); JPEG no.",
+        "Animation: WebP yes; JPEG no.",
+        "Browser support: WebP covers 97%+ of users; JPEG effectively 100%.",
+        "Email and print: JPEG — WebP support in email clients is unreliable.",
+        "Legacy software: JPEG — old editors and viewers may not open WebP at all.",
+      ],
+    },
+    { type: "h2", text: "The rule of thumb" },
+    {
+      type: "p",
+      text: "Serve WebP on your website, keep JPEG as the fallback. The <picture> element makes this automatic — browsers that understand WebP get it, and everything else silently gets the JPEG:",
+    },
+    {
+      type: "code",
+      lang: "html",
+      code: `<picture>\n  <source srcset="photo.webp" type="image/webp">\n  <img src="photo.jpg" alt="A photo" width="1200" height="800">\n</picture>`,
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Converting JPEG to WebP and deleting the original: WebP is a delivery format. Keep the JPEG or PNG original — you can't get quality back out of a converted file.",
+        "Using WebP in email: most email clients won't display it. Attach the JPEG.",
+        "Assuming smaller means worse: at the same quality setting, WebP's smaller file is the same picture. Compare at matched quality, not matched file size.",
+        "Forgetting transparency needs: if your image needs an alpha channel, JPEG was never an option — that's WebP or PNG territory.",
+      ],
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Convert your images with the [Image & SVG Converter](https://byte-kit.dev/tools/image-svg-converter) — drop in a JPEG, get a WebP out, entirely in your browser with nothing uploaded.",
+    },
+  ],
+},
+{
+  slug: "password-vs-passphrase",
+  title: "Password vs Passphrase: What's Actually Stronger?",
+  excerpt:
+    "Length beats complexity: a passphrase of four random words is stronger in practice than P@ssw0rd! — and you can actually remember it.",
+  date: "2026-10-17",
+  readingTime: "5 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: the passphrase wins. Password strength comes from entropy — roughly, length times unpredictability — and a passphrase of four or more random words has far more of it in practice than a short password full of symbols. Length beats complexity, every time.",
+    },
+    { type: "h2", text: "The math: length beats complexity" },
+    {
+      type: "p",
+      text: "Every extra character multiplies the number of possible passwords. Widening the character set (adding symbols) helps a little; adding one more character multiplies the possibilities by the entire set size. Run the numbers and the gap is clear:",
+    },
+    {
+      type: "code",
+      lang: "javascript",
+      code: `// Theoretical entropy: length × log2(pool size)\nconst entropy = (length, pool) => length * Math.log2(pool);\n\nentropy(10, 94);   // random 10-char password: ≈ 66 bits (strong — but nobody memorizes these)\nentropy(4, 7776);  // 4 random diceware words: ≈ 52 bits (strong AND memorable)\n\n// The catch: "P@ssw0rd!" is not random. Attackers try dictionary words\n// with predictable substitutions first, so its real entropy is a\n// fraction of the theoretical 66 bits. Random words stay random.`,
+    },
+    { type: "h2", text: "Why P@ssw0rd fails" },
+    {
+      type: "p",
+      text: "Leet-speak substitutions (a→@, e→3, o→0) feel clever, but password crackers have known every one of them for decades — they are baked into the dictionaries attackers try first. \"P@ssw0rd!\" is a dictionary word wearing a costume. A password's strength is not how strange it looks to you; it is how unpredictable it is to someone guessing systematically. Four genuinely random words have no pattern to exploit, which is exactly why they hold up.",
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "Complexity theater: \"P@ssw0rd!\" looks strong and is weak. Unpredictability is what matters, not the symbol count.",
+        "Reusing one good password: a strong password used on ten sites is ten sites' worth of risk. One breach exposes all of them.",
+        "Predictable \"random\" words: a passphrase only works if the words are actually random — song lyrics and famous quotes are in the dictionaries too.",
+        "Skipping 2FA: even the strongest password can leak. Two-factor authentication means a stolen password alone is not enough.",
+        "Storing passwords in plaintext notes: if you have to write them down, use a password manager — that is what it is for.",
+      ],
+    },
+    { type: "h2", text: "What to actually do" },
+    {
+      type: "p",
+      text: "Generate a passphrase of four or more random words for the accounts you type by hand, use a password manager to generate and store a unique random password for everything else, and turn on two-factor authentication wherever it matters — email and banking first. You only need to memorize one strong master password; the manager remembers the rest.",
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Generate a strong passphrase or a random password with the [Password & UUID Generator](https://byte-kit.dev/tools/password-uuid-generator) — everything is created locally in your browser, nothing is sent or stored anywhere.",
+    },
+  ],
+},
 ];
 
 export const getPost = (slug: string) => posts.find((post) => post.slug === slug);

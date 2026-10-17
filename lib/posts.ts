@@ -1852,6 +1852,88 @@ export const posts: Post[] = [
     },
   ],
 },
+{
+  slug: "how-to-encode-html-entities",
+  title: "How to Encode HTML Entities (and Decode Them Back)",
+  excerpt:
+    "Encoding HTML means swapping & < > \" ' for &amp; &lt; &gt; &quot; &#x27; — the browser then shows them as text instead of parsing them as markup. Here is the one-liner, the decode trick, and the five traps.",
+  date: "2026-10-17",
+  readingTime: "5 min read",
+  author: "Shayan",
+  content: [
+    {
+      type: "p",
+      text: "Short answer: HTML-encoding text means replacing the five characters the browser treats as markup — & < > \" ' — with their entities: &amp; &lt; &gt; &quot; &#x27;. Once encoded, the browser displays them as text instead of parsing them. That is how you safely drop user input, code samples, or math like a < b into a page without breaking it — or opening a cross-site scripting (XSS) hole.",
+    },
+    { type: "h2", text: "The five characters that matter" },
+    {
+      type: "list",
+      items: [
+        "& → &amp; — the ampersand itself; always encode this one first",
+        "< → &lt; and > → &gt; — otherwise the browser reads them as tags",
+        "\" → &quot; — needed when text lands inside an attribute value",
+        "' → &#x27; (or &apos; in HTML5 — it is not valid in HTML4)",
+      ],
+    },
+    { type: "h2", text: "Named vs numeric entities" },
+    {
+      type: "p",
+      text: "Entities come in two spellings. Named entities like &copy;, &nbsp;, and &hearts; are readable but cover only about 250 common characters. Numeric entities spell the Unicode code point directly — &#169; in decimal, &#xA9; in hexadecimal — and are exhaustive: every character has one. Same rendered result, different trade-off: readability versus completeness.",
+    },
+    { type: "h2", text: "Encoding in JavaScript: the one-liner" },
+    {
+      type: "code",
+      lang: "javascript",
+      code: `const escapeHtml = (s) =>
+  s.replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#x27;",
+  }[c]));
+
+escapeHtml('<a href="x">Tom & Jerry</a>');
+// "&lt;a href=&quot;x&quot;&gt;Tom &amp; Jerry&lt;/a&gt;"`,
+    },
+    {
+      type: "p",
+      text: "The regex-plus-map version does the swap in a single pass, so replaced text is never rescanned — there is no ordering trap. If you write it as chained replaces instead (.replace(/&/g, \"&amp;\").replace(/</g, \"&lt;\")…), the & replace MUST come first, or the & inside your own &lt; gets encoded again and you end up with &amp;lt; — the classic double-encoding bug.",
+    },
+    { type: "h2", text: "Decoding: the textarea trick" },
+    {
+      type: "code",
+      lang: "javascript",
+      code: `const decodeHtml = (s) => {
+  const t = document.createElement("textarea");
+  t.innerHTML = s;
+  return t.value;
+};
+
+decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
+    },
+    {
+      type: "p",
+      text: "A textarea parses entities but never executes scripts, which makes it the safe way to decode in the browser. (DOMParser works too — new DOMParser().parseFromString(s, \"text/html\").documentElement.textContent — but never feed decoded output straight back into innerHTML, or you have just undone all of your encoding.)",
+    },
+    { type: "h2", text: "The five traps" },
+    {
+      type: "list",
+      items: [
+        "Double-encoding: encoding twice turns & into &amp;amp;, which displays as the literal text \"&amp;\" instead of \"&\". Encode once, at the boundary where text enters HTML.",
+        "&nbsp; is not a space: it is U+00A0, a non-breaking space. It will not match a regular space in ===, and in HTML it refuses to collapse like normal whitespace — that is its whole job.",
+        "encodeURIComponent is for URLs, not HTML: it turns < into %3C, which the browser shows literally. Different context, different escaping.",
+        "innerHTML with raw user input is an XSS hole: a string like <img src=x onerror=...> survives unless you encode & < > \" '. Either encode first, or skip the problem with textContent, which encodes for you automatically.",
+        "Forgetting attribute quotes: a \" inside an attribute value breaks out of it — that is exactly why &quot; exists. Encode \" and ' whenever text lands inside an attribute.",
+      ],
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Encode or decode a whole block at once with [HTML Entity Encode Online](https://byte-kit.dev/tools/html-entity-encoder) — named and numeric entities in both directions, everything in your browser, nothing uploaded.",
+    },
+  ],
+},
 ];
 
 export const getPost = (slug: string) => posts.find((post) => post.slug === slug);

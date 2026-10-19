@@ -33,6 +33,11 @@
 - [WebP vs JPEG: Which Image Format Should You Use?](https://bytetips.tech/posts/webp-vs-jpeg/): WebP is 25–35% smaller than JPEG at the same quality and works in 97%+ of browsers — but JPEG still wins for email, print, and legacy software.
 - [Password vs Passphrase: What's Actually Stronger?](https://bytetips.tech/posts/password-vs-passphrase/): Length beats complexity: a passphrase of four random words is stronger in practice than P@ssw0rd! — and you can actually remember it.
 - [How to Encode HTML Entities (and Decode Them Back)](https://bytetips.tech/posts/how-to-encode-html-entities/): Swap & < > " ' for &amp; &lt; &gt; &quot; &#x27; so the browser shows text instead of parsing markup — plus the decode trick and the five traps.
+- [How to Open HEIC Files on Windows](https://bytetips.tech/posts/how-to-open-heic-files-on-windows/): Windows cannot open iPhone HEIC photos out of the box — convert them to JPG, install Microsoft's HEIF codec, or sync through the cloud.
+- [How to Decode Base64 (Text, Images, Files, and the Common Errors)](https://bytetips.tech/posts/how-to-decode-base64/): Decode Base64 with atob(), handle the Unicode trap with TextDecoder, fix padding and base64url, and decode data-URI images to Blobs.
+- [How JWT Works: Header, Payload, Signature](https://bytetips.tech/posts/how-jwt-works-header-payload-signature/): A JWT is three base64url parts — header, payload claims, signature. Signed, not encrypted; the signature proves the issuer, the encoding proves nothing.
+- [How to Validate JSON Online](https://bytetips.tech/posts/how-to-validate-json-online/): Valid JSON needs double quotes, no trailing commas, no comments — the 7 errors that break everything, how to read the error position, and schema validation.
+- [PNG vs JPG: Which Image Format Should You Use?](https://bytetips.tech/posts/png-vs-jpg-which-format-to-use/): Photos go JPG at quality 80–85, graphics and anything with transparency go PNG — the lossy-vs-lossless decision list.
 
 ## Tools
 

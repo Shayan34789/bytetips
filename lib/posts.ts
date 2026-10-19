@@ -1934,6 +1934,332 @@ decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
     },
   ],
 },
+  {
+    slug: "how-to-open-heic-files-on-windows",
+    title: "How to Open HEIC Files on Windows",
+    excerpt:
+      "Windows cannot open iPhone HEIC photos out of the box. Convert them to JPG — the fastest option — or install Microsoft's HEIF codec; here is what each route costs you.",
+    date: "2026-10-19",
+    readingTime: "5 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: convert the HEIC file to JPG. Windows 10 and 11 do not ship with HEIC support, so the Photos app just refuses the file. Converting takes seconds, works on any machine with a browser, and a JPG opens everywhere forever. The alternative is installing Microsoft's HEIF codec from the Microsoft Store — it teaches the Photos app to open HEIC directly, but it is a paid extension and it only fixes your own machine, not the files you send to other people.",
+      },
+      { type: "h2", text: "Why Windows cannot open HEIC" },
+      {
+        type: "p",
+        text: "HEIC (High Efficiency Image Container) is the default photo format on iPhones since iOS 11. It stores roughly twice the quality per megabyte of JPEG by using the HEVC video codec's compression. Apple ships the decoder on every iPhone and Mac; Microsoft does not license it for Windows. The result: double-click an .heic file on Windows and Photos shows an error or asks you to install something. The file is not broken — your OS just lacks the decoder.",
+      },
+      { type: "h2", text: "Option 1: convert to JPG (recommended)" },
+      {
+        type: "p",
+        text: "Converting sidesteps the codec problem entirely. The JPG you get opens in every app on every platform, emails cleanly, and uploads to every website. Do the conversion in the browser rather than installing a desktop tool: the file never leaves your device, nothing is installed, and it works the same on a work laptop where you cannot install anything anyway.",
+      },
+      {
+        type: "p",
+        text: "One thing to know: converting HEIC to JPG is a one-way format change. You keep the visible quality — the converter decodes the full image and re-encodes it — but you lose HEIC's smaller file size and any live-photo motion data. For sharing, archiving, and editing, that is a trade worth making.",
+      },
+      { type: "h2", text: "Option 2: install the HEIF codec" },
+      {
+        type: "p",
+        text: "If you would rather open HEIC files directly, install HEIF Image Extensions from the Microsoft Store. Once installed, the Photos app opens .heic files like any other image, thumbnails appear in File Explorer, and you can edit them. Two catches: it is a paid extension (around $1, listed as HEIF Image Extensions — it has flipped between free and paid over the years, so check the current price), and if you also receive .heic video or live photos you need the separate HEVC Video Extensions too. This fixes your PC but does nothing for the people you send the files to.",
+      },
+      { type: "h2", text: "Option 3: sync through the cloud" },
+      {
+        type: "p",
+        text: "If you use iCloud for Windows, your iPhone photos sync to the PC and iCloud handles the conversion silently — you see JPGs. Google Photos and OneDrive do the same: upload from the iPhone, download on Windows, and you get a format Windows understands. This is convenient but slow if you just need one file opened right now, and it routes your photos through a cloud account.",
+      },
+      { type: "h2", text: "Quick answers" },
+      {
+        type: "list",
+        items: [
+          "Do I lose quality converting HEIC to JPG? No visible loss. The conversion decodes the full-resolution image and re-encodes it at high quality. You lose file-size efficiency, not pixels.",
+          "Can I convert a whole folder at once? A batch converter handles folders: drop in every .heic and get JPGs back. The single-file tool above works when you have one or two; look for batch mode for dozens.",
+          "Why does my iPhone save HEIC in the first place? Because it halves your storage use. You can switch the camera to JPG in Settings → Camera → Formats → Most Compatible — but you will use roughly twice the space.",
+          "What about HEIC files from a DSLR or Android? Same story: any .heic needs the codec or a conversion, regardless of which device created it.",
+        ],
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Drop the file into the [HEIC Converter](https://byte-kit.dev/tools/heic-converter) — it decodes the HEIC in your browser and hands you back a JPG or PNG, nothing uploaded. Already converting regularly? [How to Convert HEIC Photos to JPG](/posts/how-to-convert-heic-to-jpg) covers the conversion side in more depth, including batch jobs.",
+      },
+    ],
+  },
+  {
+    slug: "how-to-decode-base64",
+    title: "How to Decode Base64 (Text, Images, Files, and the Common Errors)",
+    excerpt:
+      "Decoding Base64 is one line with atob() — until the text is not ASCII, the padding is missing, or the string is base64url. Here is the robust version for each case.",
+    date: "2026-10-19",
+    readingTime: "6 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: in the browser, atob() decodes Base64 to a string — atob(\"SGVsbG8=\") gives you \"Hello\". In Node.js, use Buffer.from(b64, \"base64\").toString(\"utf8\"). The one-liner breaks in three common situations: non-ASCII text comes back as mojibake, missing = padding throws, and base64url strings (the kind inside JWTs and URLs) use different characters. Handle those three and decoding works everywhere.",
+      },
+      { type: "h2", text: "The one-liner" },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `// Browser\natob("SGVsbG8sIHdvcmxkIQ=="); // "Hello, world!"\n\n// Node.js\nBuffer.from("SGVsbG8sIHdvcmxkIQ==", "base64").toString("utf8"); // "Hello, world!"\n\n// Python\nimport base64\nbase64.b64decode("SGVsbG8sIHdvcmxkIQ==").decode("utf-8")  # "Hello, world!"`,
+      },
+      { type: "h2", text: "The Unicode trap" },
+      {
+        type: "p",
+        text: "atob() returns a string where each character is one byte — Latin-1, not UTF-8. Decode Base64 that holds non-ASCII text and you get mojibake: the checkmark ✓ encodes to \"4pyT\", and atob(\"4pyT\") returns the three garbage characters \"âœ“\" instead of \"✓\". The fix is to treat the result as raw bytes and decode them as UTF-8:",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `function b64decodeUnicode(b64) {\n  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));\n  return new TextDecoder().decode(bytes);\n}\n\nb64decodeUnicode("4pyT"); // "✓" — correct`,
+      },
+      {
+        type: "p",
+        text: "This is the same trap in reverse when encoding: btoa() throws InvalidCharacterError on any character above U+00FF. Node's Buffer and Python's base64 handle Unicode correctly out of the box — only the browser one-liner needs the TextDecoder wrapper.",
+      },
+      { type: "h2", text: "Padding and base64url" },
+      {
+        type: "p",
+        text: "Standard Base64 output is always a multiple of 4 characters, padded with = at the end. Two variants break the naive decoder. First, many producers strip the padding (JWTs do this) — atob() then throws because the length is not a multiple of 4. Re-add it: b64 += \"=\".repeat((4 - (b64.length % 4)) % 4). Second, base64url swaps + and / for - and _ so the string survives inside URLs and filenames. Convert back before decoding:",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `function b64urlDecode(b64url) {\n  let b64 = b64url.replace(/-/g, "+").replace(/_/g, "/");\n  b64 += "=".repeat((4 - (b64.length % 4)) % 4); // restore padding\n  return new TextDecoder().decode(\n    Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))\n  );\n}`,
+      },
+      { type: "h2", text: "Decoding images and files" },
+      {
+        type: "p",
+        text: "Base64 images usually arrive as data URIs — data:image/png;base64,iVBORw0KGgo... The part after the comma is the payload; the part before it names the MIME type. Strip the prefix, decode to bytes, and wrap them in a Blob to get a real file back:",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `function dataUriToBlob(dataUri) {\n  const [header, b64] = dataUri.split(",");\n  const mime = header.match(/data:(.*?);/)[1];\n  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));\n  return new Blob([bytes], { type: mime });\n}\n\n// Show it: img.src = URL.createObjectURL(dataUriToBlob(uri));\n// Save it: a.href = URL.createObjectURL(blob); a.download = "image.png";`,
+      },
+      { type: "h2", text: "The errors you will actually see" },
+      {
+        type: "list",
+        items: [
+          "InvalidCharacterError (browser): the string contains a character outside the Base64 alphabet — often whitespace, line breaks, or a stray quote copied from JSON. Strip everything that is not A–Z a–z 0–9 + / = (or - _ for base64url) before decoding.",
+          "Incorrect padding (Python): the = padding is missing or the length is not a multiple of 4. Add padding with b64 += \"=\" * (-len(b64) % 4).",
+          "Mojibake instead of an error: you decoded UTF-8 bytes as Latin-1. Use the TextDecoder version above.",
+          "Decoded output that is still unreadable: the payload may be gzipped or it may be double-encoded. Try decoding twice — if the second pass produces clean text, the producer encoded an already-encoded string.",
+        ],
+      },
+      { type: "h2", text: "Quick answers" },
+      {
+        type: "list",
+        items: [
+          "Is Base64 encryption? No. It is an encoding — anyone can decode it. Never treat Base64 as a way to hide secrets; it only makes binary data survive text channels.",
+          "How do I decode a huge Base64 string? atob() handles megabytes fine in practice, but for very large payloads decode in chunks or stream it — building one giant intermediate string is what runs out of memory, not the decoding itself.",
+          "Why does my Base64 have no = at the end? The producer used unpadded base64url (common in JWTs and URL tokens). Re-add the padding as shown above.",
+        ],
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste any Base64 string into the [URL & Base64 Encoder](https://byte-kit.dev/tools/url-base64) — it decodes text in your browser and flags the padding and character errors above before they bite. Going the other direction? [How to Encode Text to Base64](/posts/how-to-encode-text-to-base64) covers encoding, including the same Unicode trap from the other side.",
+      },
+    ],
+  },
+  {
+    slug: "how-jwt-works-header-payload-signature",
+    title: "How JWT Works: Header, Payload, Signature",
+    excerpt:
+      "A JWT is three Base64 strings separated by dots: a header, a payload of claims, and a signature. The signature proves who issued it — the encoding proves nothing.",
+    date: "2026-10-19",
+    readingTime: "6 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: a JWT (JSON Web Token) is three base64url-encoded parts joined by dots — header.payload.signature. The header names the signing algorithm, the payload carries claims (who you are, when the token expires), and the signature is a cryptographic checksum over the first two parts made with the issuer's secret or private key. Anyone can read the payload — it is only encoded, not encrypted. Only someone with the key can produce a valid signature, and that asymmetry is the entire security model.",
+      },
+      { type: "h2", text: "The three parts" },
+      {
+        type: "p",
+        text: "A token looks like this: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c. Split on the dots and base64url-decode the first two parts and you get plain JSON. The third part is opaque bytes — the signature.",
+      },
+      { type: "h2", text: "Part 1: the header" },
+      {
+        type: "code",
+        lang: "json",
+        code: `{\n  "alg": "HS256",\n  "typ": "JWT"\n}`,
+      },
+      {
+        type: "p",
+        text: "The header is small on purpose: it says which algorithm signed the token (alg — HS256, RS256, ES256 are the common ones) and that this is a JWT (typ). Some tokens also carry kid, a key ID telling the verifier which of several keys to check against — useful when keys rotate. The header is not trusted on its own: a verifier must check that alg is one it expects, because accepting an attacker-chosen algorithm is exactly how the old alg:none attacks worked (more on that below).",
+      },
+      { type: "h2", text: "Part 2: the payload and its claims" },
+      {
+        type: "code",
+        lang: "json",
+        code: `{\n  "sub": "1234567890",\n  "name": "John Doe",\n  "iat": 1516239022,\n  "exp": 1516242622,\n  "iss": "https://auth.example.com",\n  "aud": "my-api"\n}`,
+      },
+      {
+        type: "p",
+        text: "The payload is a set of claims — name/value assertions about the subject. The JWT standard (RFC 7519) defines seven registered claims: iss (issuer), sub (subject — usually the user ID), aud (audience — who the token is for), exp (expiry, seconds since epoch), nbf (not-before), iat (issued-at), and jti (a unique token ID, handy for revocation lists). Everything else is a public or private claim — name, email, roles, permissions — namespaced by convention to avoid collisions. Keep payloads small: the whole token rides in an HTTP header on every request.",
+      },
+      { type: "h2", text: "Part 3: the signature" },
+      {
+        type: "p",
+        text: "The signature is computed over the exact text of the first two parts: signature = SIGN(base64url(header) + \".\" + base64url(payload), key). With HS256 the key is a shared secret and both sides use HMAC-SHA256; with RS256 the issuer signs with its RSA private key and anyone verifies with the public key. Verification is just recomputation: the verifier re-signs the header and payload it received and compares the result with the signature on the token. Any change to even one character — a flipped claim, a swapped algorithm — produces a different signature and the token is rejected.",
+      },
+      { type: "h2", text: "Signed is not encrypted" },
+      {
+        type: "p",
+        text: "This is the misunderstanding that causes real incidents. Base64url is an encoding, not encryption: the payload is readable by anyone who holds the token — paste it into any decoder and the claims are right there. The signature guarantees integrity and authenticity, not confidentiality. Never put passwords, SSNs, or anything sensitive in a payload. If the claims must be secret, that is a different token type (JWE, JSON Web Encryption) — a standard JWT is a signed postcard, not a sealed envelope.",
+      },
+      { type: "h2", text: "The alg:none trap" },
+      {
+        type: "p",
+        text: "The classic JWT attack exploits verifiers that trust the header's alg field. An attacker takes a valid token, changes alg to \"none\", strips the signature, and edits the payload — say, promoting themselves to admin. A verifier that honors the header's algorithm choice accepts the unsigned token as genuine. The fix is on the verifier side and it is absolute: hardcode the expected algorithm, reject anything else, and reject unsigned tokens outright. Modern libraries do this by default; hand-rolled verification often does not.",
+      },
+      { type: "h2", text: "Quick answers" },
+      {
+        type: "list",
+        items: [
+          "Can I decode a JWT without the secret? Yes — decoding needs no key, because the payload is only encoded. But decoding is not verifying: reading the claims tells you what the token says, only signature verification tells you whether to believe it.",
+          "How long should a token live? Access tokens: minutes to an hour. Long-lived tokens are a liability if leaked — pair a short access token with a refresh token instead of stretching exp.",
+          "HS256 or RS256? HS256 with a shared secret is fine when one service both issues and verifies. RS256 fits microservices: the auth server holds the private key, every service verifies with the public key, and no service can mint tokens.",
+          "Where do I store it? Not in localStorage if XSS is a threat model — any script on the page can read it. HttpOnly cookies are the safer default for browser apps.",
+        ],
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste a token into the [JWT Decoder](https://byte-kit.dev/tools/jwt-decoder) to see the header, payload, and claims decoded in your browser — nothing uploaded, which matters when the token belongs to a real user. Then read [How to Check If a JWT Is Expired (the exp Claim)](/posts/how-to-check-if-jwt-is-expired) for the expiry check and the seconds-vs-milliseconds trap.",
+      },
+    ],
+  },
+  {
+    slug: "how-to-validate-json-online",
+    title: "How to Validate JSON Online",
+    excerpt:
+      "Validating JSON means checking it against the strict JSON grammar — no trailing commas, no comments, double quotes only. Here are the 7 errors that break everything and how to read the error message.",
+    date: "2026-10-19",
+    readingTime: "5 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: paste the text into a JSON validator — or run JSON.parse() on it. Valid JSON is stricter than the JavaScript object literals you write every day: keys and strings need double quotes, trailing commas are forbidden, comments are not allowed, and the whole document must be a single value. Nearly every validation failure is one of seven mistakes, and modern parsers point at the exact position.",
+      },
+      { type: "h2", text: "What valid JSON actually allows" },
+      {
+        type: "p",
+        text: "The grammar is tiny: objects with double-quoted keys, arrays, strings in double quotes, numbers, true, false, and null. That is the whole language. Everything developers habitually write in config files and then wonder why the parser rejects — single-quoted strings, trailing commas, comments, unquoted keys, NaN, Infinity, undefined — is not JSON. If your data comes from a human-edited file, assume one of those is present.",
+      },
+      { type: "h2", text: "The 7 errors that break everything" },
+      {
+        type: "list",
+        items: [
+          "Trailing commas: {\"a\": 1,} — legal in JavaScript, fatal in JSON. The most common error in hand-written config.",
+          "Single quotes: {'a': 1} — JSON strings take double quotes only. A quick find-and-replace fixes it only if no string contains an apostrophe; safer to re-quote properly.",
+          "Unquoted keys: {a: 1} — every key must be a double-quoted string.",
+          "Comments: // and /* */ are not part of JSON. (JSONC — JSON with Comments — is a VS Code / TypeScript-config dialect, not JSON; parsers will reject it.)",
+          "Multiple top-level values: {\"a\":1} {\"b\":2} — one document, one value. Newline-separated records are JSON Lines, a different format.",
+          "Control characters in strings: raw newlines or tabs inside a \"string\" must be escaped as \\n and \\t.",
+          "NaN, Infinity, undefined: not JSON values. Use null, or encode them as strings if you must round-trip them.",
+        ],
+      },
+      { type: "h2", text: "Reading the error message" },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `JSON.parse('{"a": 1,}');\n// SyntaxError: Unexpected token '}', "{"a": 1,}" is not valid JSON\n\nJSON.parse('{"a": 1');\n// SyntaxError: Unterminated string in JSON at position 8`,
+      },
+      {
+        type: "p",
+        text: "Modern JavaScript engines quote the offending input and give you a position — count characters from the start (position 0) to land on the exact spot. The reported position is where the parser gave up, which is usually one token after the real mistake: a missing closing quote at position 8 gets reported a few characters later. When the position points at the very end of the input, suspect a missing closing brace or bracket.",
+      },
+      {
+        type: "code",
+        lang: "javascript",
+        code: `function validateJson(text) {\n  try {\n    JSON.parse(text);\n    return { valid: true };\n  } catch (e) {\n    return { valid: false, error: e.message };\n  }\n}\n\nvalidateJson('{"a": 1,}');\n// { valid: false, error: 'Unexpected token ...' }`,
+      },
+      { type: "h2", text: "Valid syntax is not enough: validate the shape" },
+      {
+        type: "p",
+        text: "Parsing tells you the JSON is well-formed; it says nothing about whether it has the fields your code needs. For that, validate against a schema: JSON Schema (with a validator like Ajv in JavaScript) lets you declare required fields, types, and formats, and get structured errors — \"age must be a number\" instead of a crash three functions later. Syntax validation catches typos; schema validation catches wrong data.",
+      },
+      { type: "h2", text: "Quick answers" },
+      {
+        type: "list",
+        items: [
+          "Can I validate a huge file? Yes, but do not paste multi-megabyte files into a browser tab casually — parsing blocks the page while it runs. For large files, validate from the command line: python -m json.tool file.json or jq empty file.json both parse and report errors without loading a UI.",
+          "Is there a way to allow comments? Use JSONC only where the consumer supports it (VS Code settings, tsconfig). If the consumer is JSON.parse, strip comments first — or better, keep the source as JSONC and generate strict JSON from it.",
+          "Why does my API return HTML instead of JSON? That is the classic fetch bug: the server returned an error page (or you hit the wrong URL) and your code tried to parse HTML as JSON. Covered in detail in the linked post below.",
+        ],
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste the document into the [JSON Formatter & Validator](https://byte-kit.dev/tools/json-formatter) — it validates as you type, highlights the exact error position, and pretty-prints the fixed result, all in your browser. If the error mentions HTML where JSON should be, [Fix \"Unexpected token < is not valid JSON\"](/posts/fix-unexpected-token-not-valid-json) walks through that specific bug.",
+      },
+    ],
+  },
+  {
+    slug: "png-vs-jpg-which-format-to-use",
+    title: "PNG vs JPG: Which Image Format Should You Use?",
+    excerpt:
+      "Photos go JPG, graphics go PNG. One format is lossy and tiny, the other is lossless with transparency — pick by what is in the picture, not by habit.",
+    date: "2026-10-19",
+    readingTime: "5 min read",
+    author: "Shayan",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: use JPG for photographs and PNG for graphics. JPG uses lossy compression tuned for the smooth gradients of photos — it shrinks a photo to a tenth of its size with no visible change. PNG is lossless and supports transparency, which makes it right for logos, screenshots, text, and UI elements — anything with sharp edges, where JPG's compression artifacts show up as ugly halos. Pick by what is in the picture.",
+      },
+      { type: "h2", text: "Lossy vs lossless, concretely" },
+      {
+        type: "p",
+        text: "JPG compression (based on the discrete cosine transform) throws away high-frequency detail your eye barely registers in a photo — subtle texture, fine grain. At quality 80–85 a 5 MB photo becomes 400–600 KB and looks identical. PNG compression (DEFLATE, the same family as zip) throws away nothing: every pixel round-trips exactly. The price is size — a photographic PNG can be five to ten times larger than the same image as a JPG. Lossless is wasted on photos; lossy is destructive on graphics.",
+      },
+      { type: "h2", text: "Transparency decides for you" },
+      {
+        type: "p",
+        text: "JPG has no alpha channel — every pixel is fully opaque, so transparent regions become white or black on conversion. If the image needs any transparency (a logo on a colored background, an icon, a watermark), PNG is the only choice of the two. This single constraint settles most real decisions: screenshots of UI with rounded corners, diagrams overlaid on pages, any asset that must composite — PNG.",
+      },
+      { type: "h2", text: "The decision list" },
+      {
+        type: "list",
+        items: [
+          "Photograph for a blog or portfolio → JPG at quality 80–85. Below 75, banding and blockiness creep into skies and skin; above 90, the file doubles for no visible gain.",
+          "Screenshot with text or UI → PNG. JPG blurs text edges and adds ringing around every sharp line — the exact artifacts screenshots are full of.",
+          "Logo, icon, or illustration → PNG (or SVG if it is vector — infinitely sharper and smaller).",
+          "Image needing transparency → PNG, no contest.",
+          "Photo where every byte matters → JPG progressive. Progressive JPGs render top-to-bottom in passes, so the page shows a blurry preview fast and sharpens — better perceived loading than baseline JPG.",
+          "Simple graphic with few colors → PNG-8 (256 colors) instead of PNG-24 — often a third of the size with zero visible difference on flat illustrations.",
+        ],
+      },
+      { type: "h2", text: "The 80–85 quality rule" },
+      {
+        type: "p",
+        text: "JPG quality is a dial, not a preset. The useful range is narrow: 80–85 is the sweet spot for the web, where artifacts stay invisible and files stay small. Exporting at 100 does not mean lossless — JPG is always lossy — it just means enormous. And never re-save a JPG as a JPG repeatedly at low quality: each generation piles new artifacts on the old ones. Keep one high-quality master, export delivery copies from it.",
+      },
+      { type: "h2", text: "Quick answers" },
+      {
+        type: "list",
+        items: [
+          "What about WebP and AVIF? Both beat JPG and PNG on size — WebP by 25–35%, AVIF by up to 50% — and both handle transparency. Use them for production sites with a JPG/PNG fallback; for files you email or hand to other people, JPG/PNG remain the universal choice.",
+          "Why is my PNG screenshot 4 MB? PNG is lossless, so noisy content (photo backgrounds, gradients, anti-aliased text over texture) compresses badly. Either accept it, or convert photographic screenshots to JPG at quality 85.",
+          "Does format affect SEO? Indirectly: page speed is a ranking factor, and images are usually the heaviest resource. Right format plus right quality is the cheapest performance win on most pages.",
+        ],
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Converting a folder of PNG screenshots to JPGs? The [Batch Image Converter](https://byte-kit.dev/tools/batch-image-converter) does the whole folder in your browser at your chosen quality — nothing uploaded. For the step-by-step, see [How to Convert Multiple PNGs to JPG at Once](/posts/batch-convert-png-to-jpg); for the modern formats, [WebP vs JPEG](/posts/webp-vs-jpeg) covers when to skip both.",
+      },
+    ],
+  },
 ];
 
 export const getPost = (slug: string) => posts.find((post) => post.slug === slug);

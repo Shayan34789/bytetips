@@ -708,7 +708,7 @@ export const posts: Post[] = [
       { type: "h2", text: "Try it" },
       {
         type: "p",
-        text: "Drop your photos into the [HEIC Converter](https://byte-kit.dev/tools/heic-converter) to convert them to JPG, PNG, or WebP locally in your browser. Then run the results through the [Image Compressor](https://byte-kit.dev/tools/image-compressor) to shrink them for sharing. One more thing worth doing before you share any photo: read [How to Remove EXIF Data from Photos Before Sharing](/posts/how-to-remove-exif-data-from-photos) — HEIC files carry location data, and converting does not remove it.",
+        text: "Drop your photos into the [HEIC Converter](https://byte-kit.dev/tools/heic-converter) to convert them to JPG, PNG, or WebP locally in your browser. Then run the results through the [Image Compressor](https://byte-kit.dev/tools/image-compressor) to shrink them for sharing. One privacy note: HEIC files carry location data (GPS, device, timestamps), and browser-based conversion re-encodes the image, which strips that metadata. That is good for sharing — but 'date taken' will not carry over to the JPG. For the full breakdown, read [How to Remove EXIF Data from Photos Before Sharing](/posts/how-to-remove-exif-data-from-photos).",
       },
     ],
   },

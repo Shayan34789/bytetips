@@ -1,5 +1,7 @@
 import React from "react";
 import type { Block } from "@/lib/posts";
+import { slugifyHeading } from "@/lib/posts";
+import { CodeBlock } from "@/components/code-block";
 
 // Renders [label](url) inline links inside plain text blocks.
 function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
@@ -24,12 +26,23 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
 }
 
 export function PostBody({ blocks }: { blocks: Block[] }) {
+  const seen = new Map<string, number>();
+  function headingId(text: string): string {
+    const base = slugifyHeading(text);
+    const n = (seen.get(base) ?? 0) + 1;
+    seen.set(base, n);
+    return n > 1 ? `${base}-${n}` : base;
+  }
   return (
     <div>
       {blocks.map((block, index) => {
         if (block.type === "h2") {
           return (
-            <h2 key={index} className="mt-10 text-2xl font-bold leading-snug tracking-tight text-ink [overflow-wrap:anywhere]">
+            <h2
+              key={index}
+              id={headingId(block.text)}
+              className="mt-10 scroll-mt-20 text-2xl font-bold leading-snug tracking-tight text-ink [overflow-wrap:anywhere]"
+            >
               {block.text}
             </h2>
           );
@@ -50,14 +63,7 @@ export function PostBody({ blocks }: { blocks: Block[] }) {
             </ul>
           );
         }
-        return (
-          <pre
-            key={index}
-            className="mt-5 overflow-x-auto rounded-lg border border-slate-800 bg-slate-900 p-4 text-[13.5px] leading-relaxed text-slate-100"
-          >
-            <code className="font-mono">{block.code}</code>
-          </pre>
-        );
+        return <CodeBlock key={index} code={block.code} />;
       })}
     </div>
   );

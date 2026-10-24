@@ -11,8 +11,17 @@ export type Post = {
   date: string;
   readingTime: string;
   author: string;
+  category: string;
   content: Block[];
 };
+
+export const CATEGORIES = [
+  "JavaScript",
+  "JSON & Data",
+  "JWT & Security",
+  "CSS & Design",
+  "Images & Media",
+] as const;
 
 export const posts: Post[] = [
   {
@@ -23,6 +32,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "JavaScript",
     content: [
       {
         type: "p",
@@ -90,6 +100,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "JSON & Data",
     content: [
       {
         type: "p",
@@ -181,6 +192,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "JavaScript",
     content: [
       {
         type: "p",
@@ -245,6 +257,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "Images & Media",
     content: [
       {
         type: "p",
@@ -313,6 +326,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
+    category: "JSON & Data",
     content: [
       {
         type: "p",
@@ -382,6 +396,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
+    category: "JavaScript",
     content: [
       {
         type: "p",
@@ -456,6 +471,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
+    category: "JavaScript",
     content: [
       {
         type: "p",
@@ -529,6 +545,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
+    category: "JSON & Data",
     content: [
       {
         type: "p",
@@ -609,6 +626,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
+    category: "JWT & Security",
     content: [
       {
         type: "p",
@@ -671,6 +689,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
+    category: "Images & Media",
     content: [
       {
         type: "p",
@@ -720,6 +739,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
+    category: "CSS & Design",
     content: [
       {
         type: "p",
@@ -782,6 +802,7 @@ export const posts: Post[] = [
     date: "2026-10-14",
     readingTime: "4 min read",
     author: "Shayan",
+    category: "Images & Media",
     content: [
       {
         type: "p",
@@ -840,6 +861,7 @@ export const posts: Post[] = [
     date: "2026-10-15",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "JWT & Security",
     content: [
       {
         type: "p",
@@ -916,6 +938,7 @@ export const posts: Post[] = [
     date: "2026-10-15",
     readingTime: "6 min read",
     author: "Shayan",
+    category: "JSON & Data",
     content: [
       {
         type: "p",
@@ -1004,6 +1027,7 @@ export const posts: Post[] = [
     date: "2026-10-16",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "JavaScript",
     content: [
       {
         type: "p",
@@ -1060,6 +1084,7 @@ export const posts: Post[] = [
     date: "2026-10-17",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "CSS & Design",
     content: [
       {
         type: "p",
@@ -1128,6 +1153,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "6 min read",
   author: "Shayan",
+    category: "Images & Media",
   content: [
     {
       type: "p",
@@ -1188,6 +1214,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "6 min read",
   author: "Shayan",
+    category: "JWT & Security",
   content: [
     {
       type: "p",
@@ -1243,6 +1270,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "6 min read",
   author: "Shayan",
+    category: "Images & Media",
   content: [
     {
       type: "p",
@@ -1314,6 +1342,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "5 min read",
   author: "Shayan",
+    category: "Images & Media",
   content: [
     {
       type: "p",
@@ -1370,6 +1399,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "6 min read",
   author: "Shayan",
+    category: "JSON & Data",
   content: [
     {
       type: "p",
@@ -1441,6 +1471,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "5 min read",
   author: "Shayan",
+    category: "CSS & Design",
   content: [
     {
       type: "p",
@@ -1487,6 +1518,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "5 min read",
   author: "Shayan",
+    category: "Images & Media",
   content: [
     {
       type: "p",
@@ -1546,6 +1578,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "5 min read",
   author: "Shayan",
+    category: "CSS & Design",
   content: [
     {
       type: "p",
@@ -1620,6 +1653,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "5 min read",
   author: "Shayan",
+    category: "Images & Media",
   content: [
     {
       type: "p",
@@ -1680,6 +1714,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "5 min read",
   author: "Shayan",
+    category: "JavaScript",
   content: [
     {
       type: "p",
@@ -1747,6 +1782,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "5 min read",
   author: "Shayan",
+    category: "Images & Media",
   content: [
     {
       type: "p",
@@ -1809,6 +1845,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "5 min read",
   author: "Shayan",
+    category: "JWT & Security",
   content: [
     {
       type: "p",
@@ -1860,6 +1897,7 @@ export const posts: Post[] = [
   date: "2026-10-17",
   readingTime: "5 min read",
   author: "Shayan",
+    category: "JavaScript",
   content: [
     {
       type: "p",
@@ -1942,6 +1980,7 @@ decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
     date: "2026-10-19",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "Images & Media",
     content: [
       {
         type: "p",
@@ -1996,6 +2035,7 @@ decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
     date: "2026-10-19",
     readingTime: "6 min read",
     author: "Shayan",
+    category: "JSON & Data",
     content: [
       {
         type: "p",
@@ -2075,6 +2115,7 @@ decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
     date: "2026-10-19",
     readingTime: "6 min read",
     author: "Shayan",
+    category: "JWT & Security",
     content: [
       {
         type: "p",
@@ -2145,6 +2186,7 @@ decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
     date: "2026-10-19",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "JSON & Data",
     content: [
       {
         type: "p",
@@ -2212,6 +2254,7 @@ decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
     date: "2026-10-19",
     readingTime: "5 min read",
     author: "Shayan",
+    category: "Images & Media",
     content: [
       {
         type: "p",
@@ -2260,6 +2303,239 @@ decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
       },
     ],
   },
+  {
+    slug: "how-to-fix-cors-no-access-control-allow-origin",
+    title: "How to Fix 'CORS policy: No Access-Control-Allow-Origin header'",
+    excerpt:
+      "CORS is the browser blocking your fetch, not the server rejecting it. If you control the API, add the right header; if you don't, proxy through your own backend — never disable browser security.",
+    date: "2026-10-24",
+    readingTime: "6 min read",
+    author: "Shayan",
+    category: "JavaScript",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: CORS (Cross-Origin Resource Sharing) is enforced by the browser, not by the server. When your JavaScript at https://app.example.com fetches https://api.other.com and the API's response lacks an Access-Control-Allow-Origin header, the browser refuses to hand the response to your code — even though the request itself succeeded. The fix depends on one question: do you control the API? If yes, send the header. If no, stop calling the API directly from the browser and route the request through your own backend.",
+      },
+      { type: "h2", text: "What CORS actually blocks" },
+      {
+        type: "p",
+        text: "The same-origin policy says a page may only read responses from its own origin (same scheme, host, and port). CORS is the escape hatch: a server opts in to cross-origin reads by sending Access-Control-Allow-Origin. Without it, the browser still sends the request — your server logs will show it arriving — but the response is quarantined and your fetch rejects with a TypeError. That is why curl and Postman work fine while the browser fails: curl does not enforce CORS at all. A working curl request proves the API is alive; it proves nothing about browser access.",
+      },
+      { type: "h2", text: "Simple requests vs preflight" },
+      {
+        type: "p",
+        text: "Not every request gets the same treatment. A simple request — GET, HEAD, or POST with only safelisted headers and a safelisted content type (text/plain, application/x-www-form-urlencoded, or multipart/form-data) — goes straight through, and the browser checks the header on the response. Anything else triggers a preflight: the browser first sends an OPTIONS request asking permission, and only sends the real request if the preflight response allows the method and headers. This is the trap most people fall into: you add Access-Control-Allow-Origin to your GET handler, but the preflight OPTIONS handler does not send it, so requests with a JSON body or an Authorization header still fail. Both responses need the headers, and the OPTIONS response must also include Access-Control-Allow-Methods and Access-Control-Allow-Headers.",
+      },
+      { type: "h2", text: "If you control the API" },
+      {
+        type: "list",
+        items: [
+          "Send Access-Control-Allow-Origin with the exact calling origin (https://app.example.com), not a wildcard, whenever the request uses credentials. Browsers reject a wildcard origin combined with credentials outright.",
+          "Handle OPTIONS explicitly and return 204 with Access-Control-Allow-Origin, Access-Control-Allow-Methods (GET, POST, PUT, DELETE, whatever you actually support), and Access-Control-Allow-Headers (Content-Type, Authorization, and any custom header the client sends).",
+          "If the client sends credentials (cookies, Authorization), add Access-Control-Allow-Credentials: true and set fetch's credentials option to 'include' — and remember the origin must then be specific, never *.",
+          "Add Vary: Origin to responses when the allowed origin varies per request, so shared caches do not serve one origin's header to another.",
+        ],
+      },
+      { type: "h2", text: "If you don't control the API" },
+      {
+        type: "p",
+        text: "You cannot fix this from the frontend — no header, fetch option, or mode setting overrides the browser's enforcement, and mode: 'no-cors' only gives you an opaque response you cannot read, which is useless for JSON APIs. The correct fix is a same-origin proxy: your frontend calls your own backend (same origin, so no CORS), and your backend calls the third-party API (server-to-server, where CORS does not apply). In development, the framework dev-server proxy does the same job — Vite's server.proxy, Next.js rewrites, or webpack's devServer.proxy all forward /api/* to the real API without the browser ever seeing a cross-origin request.",
+      },
+      { type: "h2", text: "What not to do" },
+      {
+        type: "list",
+        items: [
+          "Do not install a browser extension that disables CORS and call the bug fixed — it only fixes your machine, and it disables a security boundary for every site you visit.",
+          "Do not route production traffic through a public CORS proxy: your users' requests, and any tokens in them, flow through a server you do not control.",
+          "Do not set Access-Control-Allow-Origin: * on an API that accepts credentials or serves private data — the wildcard is only safe for genuinely public, unauthenticated resources.",
+        ],
+      },
+      { type: "h2", text: "Why does curl work when the browser fails?" },
+      {
+        type: "p",
+        text: "Because curl does not enforce CORS at all — it sends the request and shows you whatever comes back, with no origin check. The browser is the only party enforcing the policy, which is why a working curl request proves the API is reachable but says nothing about whether a web page is allowed to read its responses.",
+      },
+    ],
+  },
+  {
+    slug: "fix-err-ssl-protocol-error-localhost",
+    title: "Fix 'ERR_SSL_PROTOCOL_ERROR' in Localhost",
+    excerpt:
+      "Your browser tried HTTPS and the TLS handshake failed. On localhost that almost always means the server is speaking plain HTTP, an HSTS entry is forcing HTTPS, or a local certificate is untrusted.",
+    date: "2026-10-24",
+    readingTime: "5 min read",
+    author: "Shayan",
+    category: "JavaScript",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: ERR_SSL_PROTOCOL_ERROR means the browser started a TLS handshake and the other side did not complete it. On localhost, the usual story is a mismatch: the URL says https:// but the dev server on that port is speaking plain HTTP, or a stale HSTS entry is forcing HTTPS onto a server that never had it. Work through the causes in order — most localhost cases are fixed in under a minute once you know which one you have.",
+      },
+      { type: "h2", text: "Cause 1: the server is HTTP, the URL is HTTPS" },
+      {
+        type: "p",
+        text: "This is the most common cause. Your dev server (Vite, Next.js, Express) defaults to plain HTTP, but you typed https://localhost:3000, or a bookmark or redirect sent you there. A plain-HTTP server cannot answer a TLS handshake, so Chrome reports ERR_SSL_PROTOCOL_ERROR. Fix: load http://localhost:3000 explicitly and check whether it works. If it does, the problem was never the server — it was the scheme.",
+      },
+      { type: "h2", text: "Cause 2: a cached HSTS entry forces HTTPS" },
+      {
+        type: "p",
+        text: "If you ever visited that localhost origin over HTTPS with a valid certificate, the browser may have cached an HSTS policy for it, and now every http:// request is silently upgraded to https:// before it leaves — straight into the same handshake failure. Fix: open chrome://net-internals/#hsts, scroll to 'Delete domain security policies', enter localhost (and the port-specific host if you use one, like myapp.localhost), and delete it. Then reload over http://. Firefox has the same concept under SiteSecurityServiceState in its profile data, but the Chrome path covers the majority of cases.",
+      },
+      { type: "h2", text: "Cause 3: the local certificate is bad" },
+      {
+        type: "p",
+        text: "If your dev server really does serve HTTPS (for example to test secure cookies or service workers), the certificate must be one the browser trusts, with a Subject Alternative Name matching the host. A self-signed certificate generated without a SAN for localhost, an expired certificate, or a certificate from an untrusted local CA all fail the handshake or the trust check. Fix: generate a trusted local certificate with mkcert — run mkcert -install once to trust its local CA, then mkcert localhost to create a certificate your browser accepts. Check the certificate's expiry if it worked before and stopped: local certificates commonly expire after a year or two.",
+      },
+      { type: "h2", text: "Cause 4: something in the middle" },
+      {
+        type: "list",
+        items: [
+          "A proxy, VPN, or antivirus web filter intercepting localhost traffic can break the handshake. Try with the proxy/VPN off and the filter paused to isolate it.",
+          "The wrong process on the port: another service listening on the same port answers the handshake with garbage. Check what is actually listening (lsof -i :3000 or netstat) and kill the squatter.",
+          "System clock far off: certificates have validity windows, and a clock set months wrong makes every certificate look expired or not-yet-valid. Fix the clock and retry.",
+        ],
+      },
+      { type: "h2", text: "What not to do" },
+      {
+        type: "p",
+        text: "Do not train yourself to click through certificate warnings to reach a dev server and then carry that habit to real sites — a warning on a production domain means the connection may genuinely be intercepted. On localhost, fix the scheme, the HSTS entry, or the certificate instead; the warning is telling you something true.",
+      },
+    ],
+  },
+  {
+    slug: "fix-property-does-not-exist-on-type-typescript",
+    title: "How to Fix 'Property does not exist on type' in TypeScript",
+    excerpt:
+      "TypeScript only knows the type you declared, not the shape at runtime. The fix is almost never 'any' — it's a better type, a narrowing check, or a corrected assumption about the data.",
+    date: "2026-10-24",
+    readingTime: "6 min read",
+    author: "Shayan",
+    category: "JavaScript",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: TypeScript is structural — it checks your code against the declared type, not against whatever the value happens to contain at runtime. 'Property X does not exist on type Y' means the compiler cannot prove X is there. The right fix depends on which of four situations you are in: a typo or missing field, a value whose type is too narrow or too vague, a union type where only some members have the property, or stale third-party types. Reaching for any silences the error and hides the bug; fix the type instead.",
+      },
+      { type: "h2", text: "Situation 1: the property genuinely isn't there" },
+      {
+        type: "p",
+        text: "Check the spelling first — userNmae vs userName is the most common cause of this error, and the compiler is right. Next, check the shape: if you build the object yourself, the property may genuinely be missing from the literal, or the API response may not include it in every case. If a field is sometimes absent, declare it optional (field?: string) and handle undefined at the use site with optional chaining or a default, instead of pretending it is always present.",
+      },
+      { type: "h2", text: "Situation 2: the type is too vague" },
+      {
+        type: "p",
+        text: "JSON.parse returns any in older setups and unknown in stricter ones, and an API helper typed as returning object or Record<string, unknown> gives you no properties at all. The fix is to declare what you actually expect: define an interface for the response shape and annotate the result (const data = (await res.json()) as UserResponse is a claim — validate the shape at runtime first if the data comes from outside your control). For data you construct, prefer satisfies over as: it checks the value against the type without widening or lying about it.",
+      },
+      { type: "h2", text: "Situation 3: unions — the property exists on some members only" },
+      {
+        type: "p",
+        text: "If the value is Cat | Dog and only Dog has breed, the compiler correctly refuses pet.breed — a Cat has no breed. Narrow first: check a discriminant field (pet.kind === 'dog'), use the in operator ('breed' in pet), or write a type guard function (function isDog(p: Pet): p is Dog). After narrowing, the property is available and the check is real, not asserted. The same pattern applies to API responses that vary by status: narrow on the status field before touching the payload.",
+      },
+      { type: "h2", text: "Situation 4: stale or missing library types" },
+      {
+        type: "p",
+        text: "When the property exists at runtime but the installed types predate it, update the package and its @types package — the types may simply be old. If the library ships no types for a newer API, extend them locally with declaration merging (declare module 'lib' { interface Thing { newProp: string } }) rather than casting to any. And when a DOM or platform API is newer than your lib setting in tsconfig, raising lib (for example adding 'DOM.Iterable') is the correct fix, not a cast.",
+      },
+      { type: "h2", text: "The one fix to avoid" },
+      {
+        type: "p",
+        text: "(value as any).property compiles and then fails at runtime in exactly the way the error was warning you about — with no stack clue, because you told the compiler to stop checking. If you must assert, assert to the narrowest correct type, and add a runtime check alongside it. A type error is the compiler doing its job; the goal is a type that matches reality, not silence.",
+      },
+      { type: "h2", text: "Try it" },
+      {
+        type: "p",
+        text: "Paste a sample API response into the [JSON to TypeScript](https://byte-kit.dev/tools/json-to-typescript) tool — it generates interfaces from the real shape, including optional fields for keys that are missing from some items, so the next version of your type matches the data instead of fighting it.",
+      },
+    ],
+  },
+  {
+    slug: "http-status-codes-explained",
+    title: "HTTP Status Codes Explained",
+    excerpt:
+      "The first digit tells you who is at fault: 2xx means success, 3xx means go elsewhere, 4xx means the client messed up, 5xx means the server did. The rest is detail.",
+    date: "2026-10-24",
+    readingTime: "7 min read",
+    author: "Shayan",
+    category: "JavaScript",
+    content: [
+      {
+        type: "p",
+        text: "Short answer: read the first digit. 1xx is informational, 2xx means the request succeeded, 3xx means redirect somewhere else, 4xx means the client sent something wrong, and 5xx means the server failed. That one digit answers the only question that matters first — whose fault is this, yours or the server's? — and the last two digits name the specific outcome.",
+      },
+      { type: "h2", text: "2xx: success" },
+      {
+        type: "list",
+        items: [
+          "200 OK — the standard success response. GET returned the resource, POST/PUT did the thing.",
+          "201 Created — a new resource was created, usually with a Location header pointing at it. The correct response to a successful POST that creates something.",
+          "204 No Content — success with deliberately no body. Common for DELETE and for updates where the client already has the state.",
+        ],
+      },
+      { type: "h2", text: "3xx: redirection" },
+      {
+        type: "list",
+        items: [
+          "301 Moved Permanently — the resource lives at a new URL for good. Search engines transfer ranking to the new URL, so use 301 for permanent moves and 308 when the method and body must be preserved.",
+          "302 Found (and 307 Temporary Redirect) — a temporary move. 302 historically lets clients change POST to GET on the redirect; 307 preserves the method. Use 307 when the distinction matters.",
+          "304 Not Modified — not an error and not a redirect to follow: the client's cached copy is still fresh (from a conditional request with If-Modified-Since or If-None-Match), so the server sends no body. A 304 in your network tab usually means caching is working.",
+        ],
+      },
+      { type: "h2", text: "4xx: client error" },
+      {
+        type: "list",
+        items: [
+          "400 Bad Request — malformed syntax or invalid data: broken JSON, a missing required field, a value that fails validation. Your request, your fix.",
+          "401 Unauthorized — despite the name, this means unauthenticated: credentials are missing or invalid. Log in or fix the token.",
+          "403 Forbidden — authenticated but not allowed. A valid login that lacks permission gets 403, not 401 — mixing them up sends users to a login page they cannot pass.",
+          "404 Not Found — no resource at this URL. Also the code servers return when they do not want to reveal whether a resource exists at all.",
+          "409 Conflict — the request conflicts with current state: a duplicate unique value, an edit based on a stale version.",
+          "422 Unprocessable Entity — the syntax is valid but the semantics are not: the JSON parses, but the email field is not an email. Validation errors belong here, not 400, in most modern APIs.",
+          "429 Too Many Requests — rate limited. Back off, respect any Retry-After header, and retry later.",
+        ],
+      },
+      { type: "h2", text: "5xx: server error" },
+      {
+        type: "list",
+        items: [
+          "500 Internal Server Error — the server crashed handling your request. The bug is on their side; retrying the identical request rarely helps.",
+          "502 Bad Gateway — a proxy or gateway got an invalid response from the upstream server. Common when the backend is down or restarting behind a load balancer.",
+          "503 Service Unavailable — the server is temporarily unable to handle the request (overloaded or in maintenance). Unlike 500, retrying later is reasonable.",
+          "504 Gateway Timeout — the proxy waited for the upstream and gave up. Slow backends and tight proxy timeouts produce this one.",
+        ],
+      },
+      { type: "h2", text: "How to read one in practice" },
+      {
+        type: "p",
+        text: "Start with the class, then the code, then the body. A 4xx means change the request; a 5xx means wait or report it; a 3xx means follow the Location header. When debugging a fetch that 'doesn't work', open the network tab before the console: fetch only rejects on network failure, so an HTTP error still resolves — your code must check response.ok (true for 200–299, false otherwise) and handle the status explicitly, or a 404 will sail through as a successful promise carrying an error page.",
+      },
+    ],
+  },
 ];
+
+
+export function slugifyHeading(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// The tool a guide funnels to: the first byte-kit.dev link in the paragraph
+// following the closing "Try it" heading. Returns null when a post has none.
+export function getPostTool(post: Post): { slug: string; label: string; url: string } | null {
+  const blocks = post.content;
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    if (block.type === "h2" && block.text === "Try it" && i + 1 < blocks.length) {
+      const next = blocks[i + 1];
+      if (next.type === "p") {
+        const m = next.text.match(/\[([^\]]+)\]\(https:\/\/byte-kit\.dev\/tools\/([a-z0-9-]+)\)/);
+        if (m) return { label: m[1], slug: m[2], url: `https://byte-kit.dev/tools/${m[2]}` };
+      }
+    }
+  }
+  return null;
+}
 
 export const getPost = (slug: string) => posts.find((post) => post.slug === slug);

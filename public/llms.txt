@@ -39,6 +39,11 @@
 - [How to Validate JSON Online](https://bytetips.tech/posts/how-to-validate-json-online/): Valid JSON needs double quotes, no trailing commas, no comments — the 7 errors that break everything, how to read the error position, and schema validation.
 - [PNG vs JPG: Which Image Format Should You Use?](https://bytetips.tech/posts/png-vs-jpg-which-format-to-use/): Photos go JPG at quality 80–85, graphics and anything with transparency go PNG — the lossy-vs-lossless decision list.
 
+- [How to Fix 'CORS policy: No Access-Control-Allow-Origin header'](https://bytetips.tech/posts/how-to-fix-cors-no-access-control-allow-origin/): CORS is the browser blocking your fetch, not the server rejecting it — simple requests vs preflight, and the fix for APIs you control vs ones you don't.
+- [Fix 'ERR_SSL_PROTOCOL_ERROR' in Localhost](https://bytetips.tech/posts/fix-err-ssl-protocol-error-localhost/): The browser tried HTTPS and the handshake failed — HTTP-vs-HTTPS mismatch, cached HSTS, bad local certificates, and how mkcert fixes the last one.
+- [How to Fix 'Property does not exist on type' in TypeScript](https://bytetips.tech/posts/fix-property-does-not-exist-on-type-typescript/): TypeScript checks the declared type, not runtime shape — typos, vague types, union narrowing, and stale library types, with the fix for each.
+- [HTTP Status Codes Explained](https://bytetips.tech/posts/http-status-codes-explained/): Read the first digit — 2xx success, 3xx redirect, 4xx client error, 5xx server error — plus the codes you'll actually meet, from 201 to 504.
+
 ## Tools
 
 - [Byte-Kit](https://byte-kit.dev): 24 free developer tools that run entirely in your browser — JSON formatter, JWT decoder, Base64/URL encoder, regex tester, color converter, image compressor, HEIC converter, EXIF remover, and more. No uploads, no accounts.

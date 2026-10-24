@@ -18,7 +18,7 @@ export default function HomePage() {
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
         Practical guides for developers
       </p>
-      <h1 className="mt-3 text-4xl font-bold leading-[1.1] tracking-tight text-ink sm:text-5xl">
+      <h1 className="mt-3 text-4xl font-bold leading-[1.1] tracking-tight text-ink [overflow-wrap:anywhere] sm:text-5xl">
         Short guides. Real answers.
       </h1>
       <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted">

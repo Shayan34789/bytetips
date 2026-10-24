@@ -29,21 +29,21 @@ export function PostBody({ blocks }: { blocks: Block[] }) {
       {blocks.map((block, index) => {
         if (block.type === "h2") {
           return (
-            <h2 key={index} className="mt-10 text-2xl font-bold leading-snug tracking-tight text-ink">
+            <h2 key={index} className="mt-10 text-2xl font-bold leading-snug tracking-tight text-ink [overflow-wrap:anywhere]">
               {block.text}
             </h2>
           );
         }
         if (block.type === "p") {
           return (
-            <p key={index} className="mt-5 text-[16px] leading-relaxed text-slate-700">
+            <p key={index} className="mt-5 text-[16px] leading-relaxed text-slate-700 [overflow-wrap:anywhere]">
               {renderInline(block.text, `p${index}`)}
             </p>
           );
         }
         if (block.type === "list") {
           return (
-            <ul key={index} className="mt-5 list-disc space-y-2 pl-6 text-[16px] leading-relaxed text-slate-700">
+            <ul key={index} className="mt-5 list-disc space-y-2 pl-6 text-[16px] leading-relaxed text-slate-700 [overflow-wrap:anywhere]">
               {block.items.map((item, itemIndex) => (
                 <li key={itemIndex}>{renderInline(item, `li${index}-${itemIndex}`)}</li>
               ))}

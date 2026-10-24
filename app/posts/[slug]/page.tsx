@@ -63,14 +63,14 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           Guides
         </Link>
         <span>/</span>
-        <span className="text-ink">{post.title}</span>
+        <span className="min-w-0 text-ink [overflow-wrap:anywhere]">{post.title}</span>
       </nav>
 
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Guide</p>
-      <h1 className="mt-3 text-4xl font-bold leading-[1.12] tracking-tight text-ink sm:text-5xl">
+      <h1 className="mt-3 text-4xl font-bold leading-[1.12] tracking-tight text-ink [overflow-wrap:anywhere] sm:text-5xl">
         {post.title}
       </h1>
-      <p className="mt-5 text-lg leading-relaxed text-muted">{post.excerpt}</p>
+      <p className="mt-5 text-lg leading-relaxed text-muted [overflow-wrap:anywhere]">{post.excerpt}</p>
       <p className="mt-6 border-y border-line py-3 text-[13px] text-muted">
         {formatDate(post.date)} · {post.readingTime} · {post.author}
       </p>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import { CookieBanner } from "@/components/cookie-banner";
+import { AdSense } from "@/components/adsense";
 import Logo from "@/components/logo";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
@@ -40,6 +41,9 @@ export const metadata: Metadata = {
   creator: "Shayan",
   publisher: "ByteTips",
   referrer: "origin-when-cross-origin",
+  other: {
+    "google-adsense-account": "ca-pub-2166178232991943",
+  },
   robots: {
     index: true,
     follow: true,
@@ -72,6 +76,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${inter.variable} min-h-[100dvh] bg-canvas font-sans text-ink antialiased`}>
+        <AdSense />
         <header className="border-b border-line bg-canvas">
           <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
             <Link href="/" aria-label="ByteTips home">

@@ -1469,7 +1469,7 @@ export const posts: Post[] = [
   excerpt:
     "Five CSS properties make the frosted-glass look: a translucent background, backdrop-filter blur and saturate, a thin light border, rounded corners, and a soft shadow.",
   date: "2026-10-17",
-  readingTime: "5 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "CSS & Design",
   content: [
@@ -1481,16 +1481,119 @@ export const posts: Post[] = [
     {
       type: "code",
       lang: "css",
-      code: `.glass {\n  background: rgba(255, 255, 255, 0.15);\n  -webkit-backdrop-filter: blur(12px) saturate(160%);\n  backdrop-filter: blur(12px) saturate(160%);\n  border: 1px solid rgba(255, 255, 255, 0.3);\n  border-radius: 16px;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n}`,
+      code: `.glass {
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}`,
     },
     {
       type: "p",
       text: "Each property has a job: the translucent background lets the page show through; blur() frosts whatever sits behind the panel (not the panel's own content); saturate() keeps the blurred colors vivid instead of washing out to grey; the 1px light border catches the edge like the rim of real glass; and the radius plus shadow lift the panel off the page. The -webkit- prefix is still needed for older Safari versions.",
     },
+    { type: "h2", text: "How backdrop-filter actually works" },
+    {
+      type: "p",
+      text: "Most developers meet backdrop-filter for the first time in a glassmorphism recipe, and it helps to know exactly what it does, because three of the common failures below come from misunderstanding it. A normal filter changes the element itself — its text, its images, everything inside it. backdrop-filter does the opposite: it leaves the element's own content completely alone and instead processes everything that has already been painted behind the element, in the area the element covers. That is why the text on a glass panel stays sharp while the photo underneath it goes soft. It is also why the panel must be at least partly transparent: if the background is fully opaque, there is nothing to see the processed backdrop through, and the filter has no visible effect at all. Finally, the backdrop is live. If the background scrolls, animates, or plays video, the frosted area updates with it — pretty, but not free, which is why the performance note at the end of this post matters.",
+    },
     { type: "h2", text: "It only works over a real background" },
     {
       type: "p",
       text: "On a flat solid color the blur has nothing to frost, so the effect vanishes and you are left with a grey translucent box. Glassmorphism needs a gradient, a photo, or a pattern behind it. Test your panel over the busiest background your page has — if the glass reads there, it reads anywhere.",
+    },
+    { type: "h2", text: "Worked example: a glass pricing card, step by step" },
+    {
+      type: "p",
+      text: "Here is the recipe used for something real: a pricing card floating over a gradient hero section. The HTML is deliberately plain — one wrapper that carries the background, and one card:",
+    },
+    {
+      type: "code",
+      lang: "html",
+      code: `<section class="hero">
+  <div class="glass-card">
+    <h3>Pro plan</h3>
+    <p class="price">$12 / month</p>
+    <p>Everything in Starter, plus unlimited projects and priority support.</p>
+    <a class="button" href="/signup">Start free trial</a>
+  </div>
+</section>`,
+    },
+    {
+      type: "code",
+      lang: "css",
+      code: `.hero {
+  /* The background IS the effect — without it there is nothing to frost */
+  background: linear-gradient(135deg, #6a5cff 0%, #e14eca 55%, #ffb86b 100%);
+  padding: 64px 24px;
+  display: grid;
+  place-items: center;
+}
+
+.glass-card {
+  max-width: 340px;
+  padding: 28px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(31, 8, 64, 0.35);
+}`,
+    },
+    {
+      type: "p",
+      text: "Walk through the choices, because each one is a decision you will face on your own design. The gradient runs from violet through pink to warm orange — three clearly different colors, so the blur has something interesting to mix at every point under the card. The card's background alpha is 0.14, near the low end of the usable range: low enough that the frosted gradient clearly shows, high enough that white text stays readable over the brightest part of the gradient. The blur is 14px rather than the 12px in the basic recipe, because the gradient's color bands are wide and a stronger blur stops the boundary between pink and orange showing as a hard line through the card. The shadow color is a deep violet-black at 0.35 alpha instead of plain black, which ties the shadow to the background's own colors and looks noticeably softer. If you change one thing at a time in a live editor — alpha first, then blur — you will see within a minute which of these values your own background wants; there is no universal perfect set, only a perfect set for the image behind your panel.",
+    },
+    { type: "h2", text: "Second variant: dark glass" },
+    {
+      type: "p",
+      text: "Not every design sits on a bright gradient. For a dark photo or a dark-mode dashboard, flip the tint from white to black and raise the alpha slightly, because dark glass needs more tint to separate from a dark backdrop:",
+    },
+    {
+      type: "code",
+      lang: "css",
+      code: `.glass-dark {
+  background: rgba(15, 15, 25, 0.35);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}`,
+    },
+    {
+      type: "p",
+      text: "Note what stayed the same: the border is still light — a dark panel with a dark border disappears — and the shadow got stronger, not weaker, because on a dark background the shadow is the only thing separating the panel from what's behind it. This variant is the one to reach for on media players, video overlays, and dark navigation bars, where a white-tinted panel would fight the content.",
+    },
+    { type: "h2", text: "Tuning the four values that matter" },
+    {
+      type: "list",
+      items: [
+        "Blur (8–20px). Below about 8px the backdrop stays recognizable and the panel reads as a window, not frosted glass. Above 20px you pay more performance for almost no visual difference. Start at 12px and move in 2px steps.",
+        "Background alpha (0.10–0.25 for light glass). This is your readability dial. If text gets hard to read, raise the alpha before you touch anything else — it is almost always the real problem.",
+        "Saturate (140–180%). Blur desaturates by nature. Anything under about 140% and bright backgrounds start to look dusty; over 180% and colors can turn neon.",
+        "Border alpha (0.25–0.4). The border is the edge highlight. Too faint and the panel bleeds into the background; too strong and it looks like an outlined box instead of glass.",
+      ],
+    },
+    {
+      type: "p",
+      text: "If your tint colors start as hex codes, [How HEX to RGB Conversion Works](/posts/hex-to-rgb-how-conversion-works) shows how to turn them into the rgba() values these recipes need — the last of the four numbers is simply the alpha above, written as a decimal.",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "The panel is just a grey translucent box. Cause: nothing colorful behind it, or the background is on the panel itself instead of behind it. Fix: put the gradient, photo, or pattern on a parent element (or the page) and keep the panel transparent.",
+        "The blur does nothing at all. Cause: an ancestor has overflow: hidden plus a transform or filter creating a different rendering context — or the background alpha is 1, so no backdrop shows through. Fix: lower the alpha first; if it still fails, move the panel out of the transformed ancestor.",
+        "Colors look washed out and dusty. Cause: blur without saturate(). Fix: add saturate(150–180%) to the same backdrop-filter line — this is the single most skipped step in the whole technique.",
+        "It works in Chrome but not Safari. Cause: the -webkit- prefixed line is missing. Fix: always ship both lines, prefixed first, exactly as in the recipe above.",
+        "Text fails contrast checks. Cause: a changing background means changing contrast — fine over the dark corner, unreadable over the bright one. Fix: raise the panel alpha, add a very subtle dark text-shadow, or place a soft dark gradient behind the text area. Test over the brightest and darkest parts of the backdrop, not the average.",
+        "Scrolling stutters on phones. Cause: too many backdrop-filter panels — it is one of the most expensive effects a browser paints, and it repaints whenever the backdrop moves. Fix: keep glass to a handful of hero elements, and never put it on long scrolling lists or dozens of cards. The shadow values matter here too — [CSS Box Shadow Explained](/posts/css-box-shadow-explained) covers how shadow size and blur drive paint cost.",
+      ],
     },
     { type: "h2", text: "The traps" },
     {
@@ -1502,6 +1605,23 @@ export const posts: Post[] = [
         "Too many blurred panels: backdrop-filter is one of the more expensive CSS properties. A few panels are fine; dozens will make scrolling stutter, especially on low-end phones.",
         "Glass over a flat background: with nothing colorful behind it there is no frosted effect — just a grey box.",
       ],
+    },
+    { type: "h2", text: "Frequently asked questions" },
+    {
+      type: "p",
+      text: "Does glassmorphism work in all browsers? Yes, in every modern browser — Chrome, Edge, Firefox, and Safari all support backdrop-filter today. Older Safari versions need the -webkit- prefix shown in the recipe, which is why it is still worth shipping both lines. The safe approach is graceful degradation: design the panel so it still looks acceptable as a plain translucent box if the filter is ever ignored.",
+    },
+    {
+      type: "p",
+      text: "Is glassmorphism bad for accessibility? It can be, if you let the background decide your contrast. The effect itself is not the problem — the problem is text sitting on an unpredictable backdrop. Keep body text large or bold where you can, hold the panel alpha high enough that the worst-case area of your background still gives you readable contrast, and never put small, low-contrast text on glass. If your audience includes low-vision users, offer a solid-background alternative in your reduced-transparency styles.",
+    },
+    {
+      type: "p",
+      text: "What is the difference between glassmorphism and a simple transparent overlay? A transparent overlay only tints what is behind it — the backdrop stays perfectly sharp, so text and shapes behind the panel fight with the panel's own content. Glassmorphism adds blur and saturation to that backdrop, which pushes it into the background and lets the panel read as one solid object. The blur is the whole difference.",
+    },
+    {
+      type: "p",
+      text: "Can I animate glass panels? Yes, but animate transform and opacity only — sliding or fading a finished panel is cheap. Animating the blur radius itself forces the browser to redo the expensive backdrop work on every frame and will stutter on most phones.",
     },
     { type: "h2", text: "Try it" },
     {

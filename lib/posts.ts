@@ -1883,7 +1883,7 @@ export const posts: Post[] = [
   excerpt:
     "Drop a folder of PNGs into a batch converter at quality 80–90 and watch gigabytes become megabytes — with the transparency and quality traps to avoid.",
   date: "2026-10-17",
-  readingTime: "5 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "Images & Media",
   content: [
@@ -1896,10 +1896,14 @@ export const posts: Post[] = [
       type: "p",
       text: "PNG is lossless: it stores every pixel exactly, which is perfect for sharp graphics but wasteful for photos. JPG is lossy: it throws away visual detail your eyes barely register. On screenshots and photographs the two look identical at quality 85 — but the JPG is a fraction of the size.",
     },
-    { type: "h2", text: "The transparency trade" },
     {
       type: "p",
-      text: "JPG has no alpha channel, so anything transparent gets filled with a solid color — usually white. That's fine for screenshots and photos, which have no transparency anyway. But logos and icons with transparent backgrounds come back with a white box around them. If transparency matters, keep the PNG.",
+      text: "The deeper reason is how the two formats treat a photograph. A photo is mostly smooth gradients — skies, skin, shadows — where neighbouring pixels are almost the same colour. PNG still records every one of those pixels faithfully, plus exact data for noise and grain you cannot even see. JPG instead describes the image in blocks and keeps only the changes your eye actually notices, discarding fine colour variation first. That is why the savings are so uneven across image types: a photograph might shrink by 90%, while a flat two-colour logo barely shrinks at all — the logo has almost no invisible detail to throw away. Knowing this tells you in advance which folders are worth batch-converting: photos, screenshots, scans, and anything camera-made. Line art, icons, and UI graphics gain little and lose their crisp edges, so they are the ones to leave as PNG.",
+    },
+    { type: "h2", text: "What the quality number actually does" },
+    {
+      type: "p",
+      text: "The quality slider is not a percentage of the original quality kept — it is a dial for how aggressively the encoder discards detail, and the scale is not linear. Between 100 and 90 the file size falls fast while the image barely changes. Between 90 and 75 you get the big size wins with differences most people cannot spot without zooming in side by side. Below 70 the encoder starts making visible decisions for you: blocky patches in skies, ringing halos around text, and smearing in faces. Two consequences follow. First, converting the same PNG at quality 85 twice in a row is harmless — the damage people blame on JPG comes from re-encoding an already-encoded JPG, where each save discards detail from an already-thinned image. Second, the right quality depends on what is in the picture, not on a universal best number — which is exactly what the sweet-spot list below is for.",
     },
     { type: "h2", text: "The quality sweet spot" },
     {
@@ -1911,10 +1915,66 @@ export const posts: Post[] = [
         "100: pointless. Enormous files, no visible gain over 90.",
       ],
     },
+    { type: "h2", text: "Worked example: a 240-screenshot folder, before and after" },
+    {
+      type: "p",
+      text: "Here is the job this post is really about, with realistic numbers. Say your screenshots folder has grown to 240 PNGs totalling 1.8 GB — a few months of saving screens at full resolution, each one between 3 and 12 MB. The goal is a shareable, emailable set of JPGs without losing the text readability that made you take screenshots in the first place.",
+    },
+    {
+      type: "list",
+      items: [
+        "Step 1 — Copy, never convert the originals. Duplicate the folder first (Screenshots-backup), because everything below is one-way: detail a JPG throws away cannot be recovered.",
+        "Step 2 — Pick quality 88. Screenshots are text-heavy, so they sit above the photo range: 88 keeps letter edges clean while still cutting most of the size. This is the one decision that matters; everything else is mechanics.",
+        "Step 3 — Convert the whole copy in one run. In a browser batch tool you drop the folder, set 88, and download one ZIP. On the command line, the ImageMagick one-liner at the end of this post does the same thing in place.",
+        "Step 4 — Check three files before trusting the batch: the smallest text you can find, a photo-like screenshot, and anything with a transparent background. Zoom to 100% on each. If the text is clean, the other 237 are fine — a batch is consistent by nature.",
+        "Result: the 240 JPGs come to roughly 190–230 MB — about an 88% reduction. The folder now fits in an email-friendly ZIP, uploads in seconds instead of minutes, and at normal viewing size nobody can tell which set is which.",
+      ],
+    },
+    {
+      type: "p",
+      text: "If your numbers look very different — say the folder only shrank 20% — the usual cause is that the PNGs were mostly flat graphics rather than photos or screenshots. That is the image-type effect from the first section, not a broken converter.",
+    },
+    { type: "h2", text: "The transparency trade" },
+    {
+      type: "p",
+      text: "JPG has no alpha channel, so anything transparent gets filled with a solid color — usually white. That's fine for screenshots and photos, which have no transparency anyway. But logos and icons with transparent backgrounds come back with a white box around them. If transparency matters, keep the PNG.",
+    },
+    {
+      type: "p",
+      text: "One refinement worth knowing: the fill colour is a choice, not a law. If the converted images are headed for a specific background — a dark website, a presentation slide, a document — convert against that colour instead of default white. A logo flattened onto your site's actual background colour looks intentional; the same logo in a white box on a dark page looks like a mistake. Most batch tools fill with white silently, which is why the white-box problem surprises people; if your tool offers a background or matte colour, set it to wherever the images will live. And if an image will ever be used on more than one background, it should not be a JPG at all — keep the PNG master and export a flattened copy per destination.",
+    },
+    { type: "h2", text: "Doing it on the command line" },
+    {
+      type: "p",
+      text: "For hundreds of files, nested folders, or a job you repeat every month, a one-line command beats any upload box. ImageMagick is free on Windows, macOS, and Linux, and this is the whole recipe:",
+    },
+    {
+      type: "code",
+      lang: "bash",
+      code: `# ImageMagick: convert every PNG in the folder at quality 85
+mogrify -format jpg -quality 85 *.png
+# Originals are kept — new .jpg files appear alongside them`,
+    },
+    {
+      type: "p",
+      text: "Two habits make the command safe at scale. Work on a copy of the folder until you trust your quality setting — mogrify writes the new JPGs alongside the PNGs and never touches the originals, but a wrong glob in the wrong folder is still a mess to clean up. And keep the quality in the command the same as the quality you tested with: a batch you verified at 88 and then ran at 75 is a different batch. If your images live in subfolders, convert one folder at a time rather than reaching for a recursive command you have not tested — five careful runs beat one clever one.",
+    },
     { type: "h2", text: "Keep it local" },
     {
       type: "p",
       text: "Screenshots often contain personal information — chats, account numbers, open tabs. A converter that runs entirely in your browser never uploads them anywhere. You can prove it: load the page, switch to airplane mode, and convert. If it still works, your files never left your device.",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Converting the only copy. Cause: working directly on the original folder to save a step. Fix: duplicate first, convert the copy, delete the PNGs only after you have opened a few JPGs and checked them. Storage is cheaper than a lost original.",
+        "Quality copied from a photo guide for screenshots. Cause: 80 is right for photos but softens small text. Fix: screenshots with text get 88–92; photos get 80–85; never use one number for both.",
+        "Re-converting your own JPGs later. Cause: treating a converted JPG as a new master and converting it again for a different size or quality. Fix: always go back to the PNG original — every JPG generation loses more detail than the one before.",
+        "A white box around every logo. Cause: transparent PNGs flattened onto the default white. Fix: set the fill to the destination background colour, or keep logos as PNG — they are small anyway and gain almost nothing from conversion.",
+        "Expecting icons to shrink. Cause: flat graphics have no invisible detail for JPG to discard, so the saving is tiny and the edges go fuzzy. Fix: leave icons, logos, and line art as PNG; batch-convert the photos and screenshots where the gigabytes actually are.",
+        "Losing track of which is the master. Cause: originals and converted files mixed in one folder with similar names. Fix: keep one clearly named masters folder of PNGs and export JPGs from it; the masters folder is the one you back up.",
+      ],
     },
     { type: "h2", text: "The traps" },
     {
@@ -1926,10 +1986,22 @@ export const posts: Post[] = [
         "Forgetting the originals: conversion is one-way for the discarded detail. Keep the PNGs until you're sure the JPGs are good.",
       ],
     },
+    { type: "h2", text: "Frequently asked questions" },
     {
-      type: "code",
-      lang: "bash",
-      code: `# ImageMagick: convert every PNG in the folder at quality 85\nmogrify -format jpg -quality 85 *.png\n# Originals are kept — new .jpg files appear alongside them`,
+      type: "p",
+      text: "Can I convert JPG back to PNG to get the quality back? No. Converting a JPG to PNG gives you a bigger file with exactly the same detail the JPG kept — the discarded information is gone, and the PNG just stores the lossy result losslessly. This is why the masters rule matters: the PNG original is the only version that still has everything.",
+    },
+    {
+      type: "p",
+      text: "What quality should I use for screenshots with text? 88–92. Text is the first thing JPG damages, because sharp letter edges are exactly the high-contrast detail the encoder smooths away. At 90, screenshot text stays crisp at a fraction of the PNG size; the same screenshot at 75 will look tired when you zoom in.",
+    },
+    {
+      type: "p",
+      text: "Does converting remove photo metadata? Usually, yes — most converters drop EXIF data (camera model, location, timestamps) when they re-encode, which is a privacy plus for sharing but a loss if you relied on that data for organising your library. Another reason to keep the PNG or original masters untouched in their own folder.",
+    },
+    {
+      type: "p",
+      text: "JPG or WebP for a whole folder? WebP usually beats JPG by another 25–35% at the same visual quality, and [WebP vs JPEG](/posts/webp-vs-jpeg) walks through the trade-offs. The catch is compatibility: JPG still opens everywhere — every editor, every upload form, every old device — which is why it remains the safe default for files you send to other people. The same logic applies to newer formats generally; [How to Convert AVIF to JPG](/posts/how-to-convert-avif-to-jpg) covers going the other direction when a file will not open at all.",
     },
     { type: "h2", text: "Try it" },
     {

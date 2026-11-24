@@ -1340,7 +1340,7 @@ export const posts: Post[] = [
   excerpt:
     "One square source image, four sizes, three link tags: 16 and 32px for tabs, 180px for Apple touch icons, 192 and 512px for PWAs.",
   date: "2026-10-17",
-  readingTime: "5 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "Images & Media",
   content: [
@@ -1363,6 +1363,87 @@ export const posts: Post[] = [
       type: "p",
       text: "ICO is a container format that can hold several sizes in one file, which is why favicon.ico remains the safest default for tabs. PNG is the right choice for the apple-touch-icon and the PWA icons — it is universally supported and easy to generate. SVG scales infinitely and stays tiny for simple marks, but not every browser supports SVG favicons, so always ship a PNG or ICO fallback alongside it.",
     },
+    { type: "h2", text: "How a browser actually finds your favicon" },
+    {
+      type: "p",
+      text: "It helps to know the order a browser follows, because three of the mistakes at the end of this post come from assuming the browser reads your HTML first. It does not — not quite. When a browser loads a page, it first looks at the <link rel=\"icon\"> tags in your HTML head and uses the best match for the size it needs. If it finds no link tag, or the linked file fails to load, it falls back to requesting /favicon.ico from your site root automatically — that request happens even on pages that never mention a favicon, which is why a missing root file shows up as 404 noise in server logs. Bookmarks, history entries, and the new-tab page each re-check the icon on their own schedule, and each one caches what it finds separately, so a tab can show the new icon while a bookmark still shows the old one for days. The practical rule follows from that order: link your icons explicitly, and still ship the root favicon.ico as the safety net, because some requests will never read your HTML at all.",
+    },
+    { type: "h2", text: "Worked example: the complete file set from one 512px source" },
+    {
+      type: "p",
+      text: "Start with a single square source image, at least 512x512, with your mark centred and nothing important near the edges. From that one file, export this set — it is the whole job, and every file below has a specific consumer:",
+    },
+    {
+      type: "code",
+      lang: "text",
+      code: `/public
+  favicon.ico            (contains 16, 32 and 48px — browser tabs, bookmarks)
+  icon-32.png            (32x32 — high-density tabs)
+  icon.svg               (vector — modern browsers, infinitely sharp)
+  apple-touch-icon.png   (180x180, solid background — iOS home screen)
+  icon-192.png           (192x192 — PWA manifest)
+  icon-512.png           (512x512 — PWA manifest, install prompt)
+  site.webmanifest       (tells the browser the PWA icons exist)`,
+    },
+    {
+      type: "p",
+      text: "Link them in your HTML head like this:",
+    },
+    {
+      type: "code",
+      lang: "html",
+      code: `<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/icon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">`,
+    },
+    {
+      type: "p",
+      text: "And the manifest itself is short — it is just a list of the two PWA sizes plus the name and colours the install prompt shows:",
+    },
+    {
+      type: "code",
+      lang: "json",
+      code: `{
+  "name": "My Website",
+  "short_name": "My Site",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#111827",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}`,
+    },
+    {
+      type: "p",
+      text: "Walk through the choices, because each line is a decision you will face on your own site. The ICO file holds three sizes inside one file, so an old browser that only understands ICO still gets a crisp icon at whatever size it asks for. The PNG at 32px is there for the browsers that prefer a raster icon over the ICO container. The SVG is listed before the PNG so a modern browser picks the sharp vector version, while an older one skips the type it does not understand and falls through to the PNG — that fallback order is the whole point of listing all three. The Apple touch icon is a separate link with no sizes attribute, because iOS ignores the generic icon links and looks for this one by name. And the manifest is linked last because only installable PWAs need it; a plain site can skip the manifest and the two PWA icons entirely and still be fully covered by the first four lines.",
+    },
+    { type: "h2", text: "Second variant: SVG-first, with a dark-mode icon" },
+    {
+      type: "p",
+      text: "If your mark is a simple shape — a letter, a geometric logo, a single bold symbol — the modern setup flips the order: SVG first, PNG as the fallback, and a second SVG that only loads in dark mode, so a dark logo stays visible on a dark tab bar instead of vanishing into it:",
+    },
+    {
+      type: "code",
+      lang: "html",
+      code: `<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/icon-dark.svg" type="image/svg+xml"
+      media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
+    },
+    {
+      type: "p",
+      text: "Two things to get right here. First, the dark-mode icon only swaps where the browser supports the media attribute on icon links — Chrome and Firefox do, and everywhere else the first SVG simply stays, so the dark variant is a progressive enhancement, never a dependency. Second, do not make the dark icon by inverting the whole mark; redraw or recolour only the parts that need it, because a blind invert turns a carefully chosen brand colour into its opposite. If your mark is photographic, detailed, or relies on gradients, skip the SVG-first route entirely and stay with the PNG set from the worked example above — SVG only wins when the artwork is simple enough to stay legible at 16 pixels.",
+    },
+    { type: "h2", text: "Designing for 16 pixels (the part most people skip)" },
+    {
+      type: "p",
+      text: "A favicon is not a small logo — it is a 16-pixel symbol, and most failures happen because the source image was designed at full size and shrunk without a second thought. Design for the smallest size first: one bold shape, high contrast, no text, no thin lines, and nothing important within the outer 10% of the square, because browsers crop and round the edges more aggressively than you expect. Test the real thing, not the source file: open your site, shrink the tab until only the icon shows, and check it against a light tab bar and a dark one. If you cannot tell what it is at arm's length from your screen, simplify it — remove a detail, thicken a stroke, or drop a second colour — and test again. Two related choices matter here as well. For the format question, [PNG vs JPG: Which Format to Use](/posts/png-vs-jpg-which-format-to-use) covers why PNG is the right raster choice for icons (lossless, with transparency), and if your source is an SVG logo, [How to Reduce SVG File Size](/posts/how-to-reduce-svg-file-size) shows how to strip the editor metadata out of it before it becomes your favicon — a 200 KB exported SVG with embedded fonts is a real thing, and it will slow every first paint that loads it.",
+    },
     { type: "h2", text: "The minimal HTML" },
     {
       type: "p",
@@ -1371,7 +1452,21 @@ export const posts: Post[] = [
     {
       type: "code",
       lang: "html",
-      code: `<link rel="icon" href="/favicon.ico" sizes="32x32">\n<link rel="icon" href="/icon.svg" type="image/svg+xml">\n<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
+      code: `<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "The new favicon will not show up. Cause: aggressive caching — browsers hold onto favicons for weeks, and a hard refresh often does not clear the icon cache. Fix: bump a query string (/favicon.ico?v=2) and check in a fresh browser profile or a private window, which has no cached icon to cling to.",
+        "The icon looks fine in the tab but black on an iPhone home screen. Cause: the apple-touch-icon has transparent areas, and iOS fills transparency with black. Fix: export the 180x180 with a solid background baked in, exactly as the traps list below says — do not rely on the PNG's alpha channel here.",
+        "A full logo becomes a smudge in a tab. Cause: the source was designed at 512px and shrunk without simplifying. Fix: design for 16px first (see the section above) — one shape, no text, thick strokes — and test it in a real narrow tab.",
+        "404 noise for /favicon.ico in the server logs. Cause: the root file is missing and browsers request it automatically. Fix: ship a real favicon.ico at the root even when you link everything explicitly.",
+        "SVG-only setup shows no icon for some visitors. Cause: not every browser supports SVG favicons, and Safari is the notable holdout. Fix: always ship the ICO or PNG fallback alongside the SVG, as in both examples above.",
+        "The PWA install prompt shows a generic icon. Cause: the manifest is linked but the 192px or 512px icon is missing, misnamed, or the wrong size. Fix: check the manifest's src paths against the real filenames, and confirm both icons are exactly the sizes the manifest claims — a 512px file declared as 192px will be rejected silently.",
+      ],
     },
     { type: "h2", text: "The traps" },
     {
@@ -1383,6 +1478,23 @@ export const posts: Post[] = [
         "Missing root favicon.ico: browsers request /favicon.ico on their own. If it is not there, you get 404 noise in your server logs.",
         "SVG-only setups: fine where supported, but without a PNG or ICO fallback some visitors get no icon at all.",
       ],
+    },
+    { type: "h2", text: "Frequently asked questions" },
+    {
+      type: "p",
+      text: "Do I still need favicon.ico in 2026? Yes. Modern browsers prefer SVG or PNG when you link them, but the root favicon.ico is still the automatic fallback for bookmarks, history, older browsers, and any request that never reads your HTML. It costs one small file to keep, and removing it buys you nothing but 404s.",
+    },
+    {
+      type: "p",
+      text: "Why won't my updated favicon show up? Because favicons are cached far more aggressively than pages — weeks, not minutes, and a normal hard refresh often leaves the icon cache alone. Bump the query string on the link (?v=2), then check in a private window or a fresh browser profile. If it shows there, the file is fine and the old cache just needs time to expire for returning visitors.",
+    },
+    {
+      type: "p",
+      text: "Can I use an emoji as my favicon? You can, and it is a legitimate shortcut for a personal site: an SVG file containing a single emoji character renders as a favicon in browsers that support SVG icons. It is not a substitute for a real brand mark on a business site, and it still needs the PNG or ICO fallback for browsers without SVG support — but for a quick project it works, and it is sharp at every size by definition.",
+    },
+    {
+      type: "p",
+      text: "Does a favicon help SEO? Not directly — Google does not rank pages higher for having a favicon. Indirectly, it matters: Google shows your favicon next to your result in mobile search, and a missing or broken icon makes the result look unfinished, which costs clicks. It is a trust signal for humans, not a ranking factor for the crawler.",
     },
     { type: "h2", text: "Try it" },
     {

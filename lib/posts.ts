@@ -2199,13 +2199,18 @@ mogrify -format jpg -quality 85 *.png
   excerpt:
     "Encoding HTML means swapping & < > \" ' for &amp; &lt; &gt; &quot; &#x27; — the browser then shows them as text instead of parsing them as markup. Here is the one-liner, the decode trick, and the five traps.",
   date: "2026-10-17",
-  readingTime: "5 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "JavaScript",
   content: [
     {
       type: "p",
       text: "Short answer: HTML-encoding text means replacing the five characters the browser treats as markup — & < > \" ' — with their entities: &amp; &lt; &gt; &quot; &#x27;. Once encoded, the browser displays them as text instead of parsing them. That is how you safely drop user input, code samples, or math like a < b into a page without breaking it — or opening a cross-site scripting (XSS) hole.",
+    },
+    { type: "h2", text: "Why these five characters are special" },
+    {
+      type: "p",
+      text: "An HTML parser has an impossible job: the same stream of characters contains both the page's structure and its text, and the only thing separating the two is a handful of marker characters. When the parser meets a < it stops reading text and starts reading a tag. When it meets an & it expects an entity to follow. Quotes end attribute values. That design is exactly why user input is dangerous and why encoding works: a comment that contains the text <script> is not data to the parser, it is an instruction — unless you encode it. Encoding rewrites the markers into a form the parser displays but never obeys. The text on screen is identical; its power is gone. Every other character in your string can pass through untouched, which is why the entire technique comes down to five replacements.",
     },
     { type: "h2", text: "The five characters that matter" },
     {
@@ -2221,6 +2226,10 @@ mogrify -format jpg -quality 85 *.png
     {
       type: "p",
       text: "Entities come in two spellings. Named entities like &copy;, &nbsp;, and &hearts; are readable but cover only about 250 common characters. Numeric entities spell the Unicode code point directly — &#169; in decimal, &#xA9; in hexadecimal — and are exhaustive: every character has one. Same rendered result, different trade-off: readability versus completeness.",
+    },
+    {
+      type: "p",
+      text: "In practice the split is simple. For the five structural characters, use the named forms where they exist (&amp;, &lt;, &gt;, &quot;) because anyone reading your HTML later will recognise them instantly. For everything else — symbols, emoji-adjacent characters, anything outside plain ASCII — numeric entities are the reliable route, because a named entity only works if that exact name exists in the HTML specification, and a typo'd name renders as literal text. If you are generating entities in code, generate numeric ones: one code path, no lookup table of names to get wrong.",
     },
     { type: "h2", text: "Encoding in JavaScript: the one-liner" },
     {
@@ -2242,6 +2251,73 @@ escapeHtml('<a href="x">Tom & Jerry</a>');
       type: "p",
       text: "The regex-plus-map version does the swap in a single pass, so replaced text is never rescanned — there is no ordering trap. If you write it as chained replaces instead (.replace(/&/g, \"&amp;\").replace(/</g, \"&lt;\")…), the & replace MUST come first, or the & inside your own &lt; gets encoded again and you end up with &amp;lt; — the classic double-encoding bug.",
     },
+    { type: "h2", text: "Worked example: rendering a user comment safely" },
+    {
+      type: "p",
+      text: "Here is the whole technique doing its real job. A visitor posts this comment on your blog:",
+    },
+    {
+      type: "code",
+      lang: "text",
+      code: `Great post! <script>alert("pwned")</script> 5 > 3 & 2 < 4, right?`,
+    },
+    {
+      type: "p",
+      text: "If that string goes into the page as-is, the browser does not show a comment — it runs a script, on your page, in every other visitor's browser. That is stored XSS, the most damaging kind, because one attacker's input attacks everyone who reads it. Now run the same string through the encoder above and put the result in the page instead:",
+    },
+    {
+      type: "code",
+      lang: "text",
+      code: `Great post! &lt;script&gt;alert(&quot;pwned&quot;)&lt;/script&gt; 5 &gt; 3 &amp; 2 &lt; 4, right?`,
+    },
+    {
+      type: "p",
+      text: "What your visitors see is the comment exactly as typed — script tags, maths and all — rendered as harmless text. Three things to notice. First, nothing was deleted or censored: encoding is not filtering, the user's words survive intact. Second, the maths needed encoding too — a raw < in \"2 < 4\" would have started a phantom tag and swallowed the rest of the sentence. Third, this only works because the encoding happened at the moment the text entered the HTML. The same string stored raw in your database is fine; the same string encoded twice is the double-encoding trap below. Encode at the boundary, once.",
+    },
+    { type: "h2", text: "The same job in other languages" },
+    {
+      type: "p",
+      text: "Every server language ships this in its standard library, and you should use the built-in rather than a hand-rolled replace, because the built-ins also handle the ordering and the quote cases for you:",
+    },
+    {
+      type: "code",
+      lang: "python",
+      code: `import html
+
+html.escape('Tom & "Jerry" <3', quote=True)
+# 'Tom &amp; &quot;Jerry&quot; &lt;3'
+# quote=True is what adds the &quot; — needed for attribute values`,
+    },
+    {
+      type: "code",
+      lang: "php",
+      code: `<?php
+echo htmlspecialchars($comment, ENT_QUOTES, 'UTF-8');
+// ENT_QUOTES encodes both " and ' — without it, ' passes through raw`,
+    },
+    {
+      type: "p",
+      text: "The pattern to spot across all three: the function is trivial, but the flags are where the bugs live. Python without quote=True leaves your attribute values open; PHP without ENT_QUOTES does the same for single quotes. Whichever language you are in, check what the default leaves unencoded before you trust it.",
+    },
+    { type: "h2", text: "Which encoding for which context" },
+    {
+      type: "p",
+      text: "HTML text is only one of the places untrusted strings land, and each context has its own escaping — using the wrong one is the subtlest bug in this whole area, because the code looks protected while it is not:",
+    },
+    {
+      type: "list",
+      items: [
+        "Between tags (element content): the five-character HTML encoding in this post.",
+        "Inside an attribute value: HTML encoding, and the value must be quoted — encoding cannot save an unquoted attribute, because a space breaks out of it without any special character at all.",
+        "Inside a URL: percent-encoding with encodeURIComponent, not entities — [encodeURI vs encodeURIComponent](/posts/encodeuri-vs-encodeuricomponent) covers exactly where each one applies.",
+        "Inside a JavaScript string in a script block: neither of the above — JSON-encode the value and let the JSON parser's escaping handle it, and never place raw user text inside a script tag.",
+        "Inside CSS: avoid putting untrusted text there at all; there is no generally safe CSS escaping for arbitrary strings.",
+      ],
+    },
+    {
+      type: "p",
+      text: "The rule underneath the list: escaping is always relative to the parser that will read the text next. Identify the parser — HTML, URL, JavaScript, CSS — and use that parser's encoding, at the moment the text crosses into it.",
+    },
     { type: "h2", text: "Decoding: the textarea trick" },
     {
       type: "code",
@@ -2258,6 +2334,17 @@ decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
       type: "p",
       text: "A textarea parses entities but never executes scripts, which makes it the safe way to decode in the browser. (DOMParser works too — new DOMParser().parseFromString(s, \"text/html\").documentElement.textContent — but never feed decoded output straight back into innerHTML, or you have just undone all of your encoding.)",
     },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Encoding when the data arrives instead of when it leaves. Cause: escaping at input time feels safer, but the database then holds encoded text that leaks into emails, PDFs, and APIs that never wanted it — and gets encoded a second time on the way into HTML. Fix: store raw, encode at the output boundary, once, per context.",
+        "Chained replaces in the wrong order. Cause: replacing < before &, so the & in your own fresh &lt; gets encoded next. Fix: & first — or use the single-pass map version above and delete the ordering problem entirely.",
+        "Encoding for HTML, then dropping the text into a URL or a script. Cause: assuming escaped is escaped. Fix: match the encoding to the parser that reads it next (see the context list above) — layers that nest get encoded per layer, innermost first.",
+        "Hand-writing a replace for two characters only. Cause: handling < and > and forgetting quotes, so attribute values stay breakable. Fix: all five characters, every time — the one-liner above is short enough that there is no reason to trim it.",
+        "Decoding user content and re-inserting it. Cause: decoding entities to display rich text, then using innerHTML for convenience. Fix: if you must show the text, use textContent, which displays it as text and re-applies the safety you just removed.",
+      ],
+    },
     { type: "h2", text: "The five traps" },
     {
       type: "list",
@@ -2268,6 +2355,23 @@ decodeHtml("&lt;strong&gt;hi&lt;/strong&gt;"); // "<strong>hi</strong>"`,
         "innerHTML with raw user input is an XSS hole: a string like <img src=x onerror=...> survives unless you encode & < > \" '. Either encode first, or skip the problem with textContent, which encodes for you automatically.",
         "Forgetting attribute quotes: a \" inside an attribute value breaks out of it — that is exactly why &quot; exists. Encode \" and ' whenever text lands inside an attribute.",
       ],
+    },
+    { type: "h2", text: "Frequently asked questions" },
+    {
+      type: "p",
+      text: "Should I encode on input or on output? On output, always. The stored data should be the user's real text; encoding is a property of one specific destination (an HTML page), and the same text may later go to an email, a PDF, or an app that needs it raw. Teams that encode on input end up with databases full of &amp; and a second encoding bug waiting at every new output format.",
+    },
+    {
+      type: "p",
+      text: "Do I still need entities now that everything is UTF-8? For ordinary characters like © or é, mostly no — a page served as UTF-8 can carry them directly, and modern sites do. The five structural characters are different: they need encoding in every charset, forever, because their meaning to the parser has nothing to do with encoding declarations. UTF-8 retired the numeric-entity workaround for foreign text; it did nothing for & < >.",
+    },
+    {
+      type: "p",
+      text: "Is &apos; safe to use for the apostrophe? In HTML5, yes — it is a defined named entity. In HTML4 and XML-less contexts it historically was not, which is why &#x27; remains the safer habit: the numeric form works everywhere, in every version, with no spec-checking. Pick &#x27; and never think about it again.",
+    },
+    {
+      type: "p",
+      text: "Can encoding alone stop XSS? For text placed in element content and quoted attributes, yes — correct encoding is a complete defence there, and it is the defence every framework applies by default. It is not sufficient inside script blocks, event-handler attributes, or URLs with dangerous schemes like javascript: — those contexts need their own handling, which is why the context list above matters more than any single function.",
     },
     { type: "h2", text: "Try it" },
     {

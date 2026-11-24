@@ -1268,13 +1268,18 @@ export const posts: Post[] = [
   excerpt:
     "Most SVG bloat is decimal precision, editor metadata, and unused definitions. Run SVGO and you will typically cut 30–70% with zero visual change.",
   date: "2026-10-17",
-  readingTime: "6 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "Images & Media",
   content: [
     {
       type: "p",
       text: "Short answer: run SVGO — npx svgo logo.svg -o logo.min.svg — and you will typically cut 30–70% with zero visual change. Most SVG bloat is not the artwork: it is decimal precision with six places, editor metadata from Illustrator or Figma, and gradient definitions nothing references.",
+    },
+    { type: "h2", text: "Where the bloat actually comes from" },
+    {
+      type: "p",
+      text: "Open a freshly exported SVG in a text editor and the surprise is how little of the file is drawing. A typical design-tool export carries the editor's own bookkeeping: XML comments naming the generator, namespaced attributes only that editor understands, layer names, and sometimes the entire editing history's worth of unused swatches, gradients, and symbols left over from earlier drafts. Then comes the drawing itself, written the way a machine writes it — every coordinate spelled out to five or six decimal places, every shape in its own group, transforms stacked on transforms. None of that is malice; the export is optimised for re-opening in the editor, not for your visitors' bandwidth. Optimisation is simply translating the file from editor-speak to browser-speak: same picture, none of the diary entries. Knowing this tells you where the wins are ranked — precision first, metadata second, structure third — which is the order the rest of this post follows.",
     },
     { type: "h2", text: "SVGO in one command" },
     {
@@ -1284,12 +1289,21 @@ export const posts: Post[] = [
     {
       type: "code",
       lang: "bash",
-      code: `# Optimize a single file\nnpx svgo logo.svg -o logo.min.svg\n\n# A typical Illustrator export:\n# logo.svg      → 38.4 KB\n# logo.min.svg  → 11.2 KB  (70.8% smaller, looks identical)`,
+      code: `# Optimize a single file
+npx svgo logo.svg -o logo.min.svg
+
+# A typical Illustrator export:
+# logo.svg      → 38.4 KB
+# logo.min.svg  → 11.2 KB  (70.8% smaller, looks identical)`,
     },
     { type: "h2", text: "Precision is the #1 lever" },
     {
       type: "p",
       text: "The single biggest source of bloat is numeric precision. A path point written as 12.345678 is visually identical to 12.35 at any normal size, but costs four extra characters — multiplied across hundreds of points. SVGO's floatPrecision option controls this: 2 decimals is a safe starting point, 1 is fine for simple icons, and detailed illustrations may need 3. If curves start looking wobbly, you went too far.",
+    },
+    {
+      type: "p",
+      text: "It helps to see why the waste is so large. Precision costs are multiplicative: an illustration with 400 path points, each with two coordinates per command and several commands per path, can carry thousands of numbers. Trimming four surplus characters from each of 3,000 numbers removes 12 KB of pure nothing — often a third of the whole file — while moving no point by more than a hundredth of a pixel at display size. That asymmetry is why precision outranks everything else: it is the only optimisation whose savings scale with the artwork's complexity while its visual risk stays near zero, right up until the moment curves start to wobble, which is your signal to stop.",
     },
     { type: "h2", text: "The easy wins SVGO handles" },
     {
@@ -1301,6 +1315,24 @@ export const posts: Post[] = [
         "Shortened IDs and cleaned path data: absolute coordinates become relative where shorter, and redundant commands are dropped.",
       ],
     },
+    { type: "h2", text: "Worked example: one logo, three stages" },
+    {
+      type: "p",
+      text: "Here is a realistic run on a company logo exported from a design tool, optimised in stages so you can see which lever does what:",
+    },
+    {
+      type: "list",
+      items: [
+        "As exported: 38.4 KB. The file opens with generator comments and editor namespaces, the paths carry six-decimal coordinates, and two gradients sit in the definitions unused — leftovers from an earlier colour direction.",
+        "After SVGO defaults: 14.9 KB. Metadata gone, unused definitions removed, groups collapsed, IDs shortened. Nothing about the picture has changed; this stage is pure bookkeeping removal, and it is where most of the win lives for typical logos.",
+        "After precision tuning (floatPrecision 2): 11.2 KB. The final quarter comes from the coordinates alone. At 1 decimal it would reach about 10.1 KB, but two curves start to flatten at small sizes — the correct call is to stop at 2 and bank the 71% total saving.",
+        "After the server's brotli compression: roughly 3.5 KB on the wire. This last number is the one your visitors actually pay, and it is why the server step at the end of this post is not optional garnish — it multiplies everything before it.",
+      ],
+    },
+    {
+      type: "p",
+      text: "The habit to take from the example is the staging: run the safe defaults first, then tune precision as its own step, checking the render after each. When something does break — and eventually something will — you know exactly which stage broke it.",
+    },
     { type: "h2", text: "Dedupe repeated shapes with <use>" },
     {
       type: "p",
@@ -1309,7 +1341,28 @@ export const posts: Post[] = [
     {
       type: "code",
       lang: "html",
-      code: `<defs>\n  <circle id="dot" r="5" fill="#F00" />\n</defs>\n<use href="#dot" x="10" y="10" />\n<use href="#dot" x="30" y="10" />\n<use href="#dot" x="50" y="10" />`,
+      code: `<defs>
+  <circle id="dot" r="5" fill="#F00" />
+</defs>
+<use href="#dot" x="10" y="10" />
+<use href="#dot" x="30" y="10" />
+<use href="#dot" x="50" y="10" />`,
+    },
+    { type: "h2", text: "When smaller is the wrong goal" },
+    {
+      type: "p",
+      text: "Two situations deserve a warning. First, an SVG with a photograph inside it is not really a vector file — it is a JPEG or PNG wrapped in XML, usually base64-encoded, which makes it about 33% larger than the image alone. No optimiser fixes that; the fix is to take the photo out and serve it as a proper WebP or JPEG, keeping SVG for genuine vector artwork. Second, if the SVG is your site's favicon or a logo you will re-edit next month, the optimised file is a delivery artifact, not a source — exactly the masters rule from image conversion. This matters practically for icons: [How to Create a Favicon for Your Website](/posts/how-to-create-a-favicon) covers why a bloated editor-export SVG makes a poor favicon, and the cure is the pipeline on this page run before the icon set is generated, not after.",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Optimising the file you still need to edit. Cause: running SVGO on the master because it is the copy at hand. Fix: keep the editor source untouched in your project, and treat the optimised output as a build artifact — regenerate it on every export, never hand-edit it.",
+        "Stripping the viewBox for a few bytes. Cause: an aggressive preset removes it along with width and height. Fix: the viewBox is what makes an SVG scale; keep removeViewBox off. A scalable graphic that cannot scale has lost its reason to exist.",
+        "One precision setting for every file. Cause: a single config copied across a whole project. Fix: icons tolerate 1 decimal, logos are safe at 2, detailed illustrations may need 3. Precision is per-artwork judgement, not a global constant.",
+        "Assuming the savings end at the file. Cause: checking the .svg size and stopping. Fix: measure what the server sends — with gzip or brotli enabled, text-heavy SVGs shrink dramatically again in transit (see the worked example). An uncompressed server can quietly undo half your optimisation.",
+        "Converting text to paths just to shrink the file. Cause: outlined text has no font dependency, which feels tidy. Fix: outlined text is usually larger, is invisible to screen readers and search engines, and cannot be selected or restyled. Keep real text unless the file is a logo, where letterforms are artwork.",
+      ],
     },
     { type: "h2", text: "The traps" },
     {
@@ -1325,7 +1378,24 @@ export const posts: Post[] = [
     { type: "h2", text: "Compress on the server too" },
     {
       type: "p",
-      text: "SVG is text, and text compresses extremely well — gzip or brotli on the server shrinks the transfer size far beyond what SVGO alone does.",
+      text: "SVG is text, and text compresses extremely well — gzip or brotli on the server shrinks the transfer size far beyond what SVGO alone does. Most hosts and CDNs enable this for text formats automatically, but SVG is occasionally missed because its MIME type (image/svg+xml) sits in the image family — it is worth one check in your server config or your browser's network panel, where the transferred size column tells you the truth. The two steps stack: SVGO removes what the file does not need, compression removes the redundancy in what remains, and together they routinely take an exported SVG to a tenth of its starting weight. It is the same layered thinking as serving modern raster formats — [WebP vs JPEG](/posts/webp-vs-jpeg) covers that side — with SVG's version being, if anything, easier wins.",
+    },
+    { type: "h2", text: "Frequently asked questions" },
+    {
+      type: "p",
+      text: "Is SVGO safe — can it break my artwork? With default settings, almost never: the default plugins remove bookkeeping, not drawing. The breakages people hit come from aggressive options — stripping the viewBox, collapsing groups that CSS or JavaScript hooks into, or rounding precision too far. The professional habit is simple: optimise a copy, open before and after side by side at high zoom, and only then ship. Thirty seconds of looking beats any guarantee.",
+    },
+    {
+      type: "p",
+      text: "My SVG is still large after SVGO — why? Three usual suspects. An embedded raster image (a photo inside the SVG) dwarfs everything else and SVGO cannot shrink it. Thousands of genuinely distinct path points — a detailed map or illustration — have a real floor set by the artwork itself. Or heavy use of filters and gradients, which are legitimately part of the drawing. Diagnose by opening the file and looking for a base64 blob; that is suspect number one nine times out of ten.",
+    },
+    {
+      type: "p",
+      text: "Should I inline SVG into the HTML instead of linking a file? For small icons used once, inlining is often best: no extra request, and CSS can style the shapes directly. For anything reused across pages, a linked file wins because the browser caches it once. Either way, optimise first — inlined bloat is paid on every page load, with no cache to save you.",
+    },
+    {
+      type: "p",
+      text: "Does SVG size affect SEO? Only through speed, the same as every other asset: smaller files load faster, and page experience follows. There is no direct ranking bonus for a small SVG — but a 200 KB unoptimised logo repeated on every page of a site is a real, self-inflicted weight, and removing it is one of the cheapest speed improvements available.",
     },
     { type: "h2", text: "Try it" },
     {

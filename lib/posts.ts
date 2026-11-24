@@ -2197,7 +2197,7 @@ mogrify -format jpg -quality 85 *.png
   excerpt:
     "Length beats complexity: a passphrase of four random words is stronger in practice than P@ssw0rd! — and you can actually remember it.",
   date: "2026-10-17",
-  readingTime: "5 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "JWT & Security",
   content: [
@@ -2213,12 +2213,64 @@ mogrify -format jpg -quality 85 *.png
     {
       type: "code",
       lang: "javascript",
-      code: `// Theoretical entropy: length × log2(pool size)\nconst entropy = (length, pool) => length * Math.log2(pool);\n\nentropy(10, 94);   // random 10-char password: ≈ 66 bits (strong — but nobody memorizes these)\nentropy(4, 7776);  // 4 random diceware words: ≈ 52 bits (strong AND memorable)\n\n// The catch: "P@ssw0rd!" is not random. Attackers try dictionary words\n// with predictable substitutions first, so its real entropy is a\n// fraction of the theoretical 66 bits. Random words stay random.`,
+      code: `// Theoretical entropy: length × log2(pool size)
+const entropy = (length, pool) => length * Math.log2(pool);
+
+entropy(10, 94);   // random 10-char password: ≈ 66 bits (strong — but nobody memorizes these)
+entropy(4, 7776);  // 4 random diceware words: ≈ 52 bits (strong AND memorable)
+
+// The catch: "P@ssw0rd!" is not random. Attackers try dictionary words
+// with predictable substitutions first, so its real entropy is a
+// fraction of the theoretical 66 bits. Random words stay random.`,
+    },
+    { type: "h2", text: "How passwords actually get cracked" },
+    {
+      type: "p",
+      text: "The entropy numbers only make sense against how guessing really happens, and there are two very different arenas. Online guessing is the slow one: an attacker typing into a login form faces rate limits, lockouts, and captchas, so they get maybe thousands of tries — only the truly common passwords (123456, password, your team's name) fall there. The dangerous arena is offline cracking. When a site's password database leaks, attackers take the hashes home and guess on their own hardware, where a single good graphics card tries billions of candidates per second against a fast hash. In that arena the attack order is always the same: leaked password lists first, then dictionary words, then dictionary words with every known mutation — capitalise the first letter, append a year, swap a for @ — and only at the end, true brute force. Your password's job is to still be standing when the cheap lists run out. That is precisely the job random words do well and decorated dictionary words do badly: the mutations are all in the cheap lists, and genuinely random combinations are only reachable by the brute force that takes centuries at 50-plus bits.",
     },
     { type: "h2", text: "Why P@ssw0rd fails" },
     {
       type: "p",
       text: "Leet-speak substitutions (a→@, e→3, o→0) feel clever, but password crackers have known every one of them for decades — they are baked into the dictionaries attackers try first. \"P@ssw0rd!\" is a dictionary word wearing a costume. A password's strength is not how strange it looks to you; it is how unpredictable it is to someone guessing systematically. Four genuinely random words have no pattern to exploit, which is exactly why they hold up.",
+    },
+    { type: "h2", text: "Worked example: build a passphrase properly" },
+    {
+      type: "p",
+      text: "The method matters more than the words, so here is the whole process, the way the diceware system that popularised passphrases does it:",
+    },
+    {
+      type: "list",
+      items: [
+        "Step 1 — Start from a word list, not your imagination. Diceware uses a fixed list of 7,776 words. Your brain is a terrible random generator: left to choose, you will pick common words in a meaningful order, and meaningful order is a pattern attackers model.",
+        "Step 2 — Roll for each word. Physical dice or a trustworthy generator picks each word independently — say the roll produces cleft, apricot, blunder, tonic. Four words, no connection between them, nothing about you in any of them.",
+        "Step 3 — Join them plainly. cleft-apricot-blunder-tonic is the passphrase. Separators are for your typing comfort, not security — hyphens, spaces, or nothing all keep the same entropy.",
+        "Step 4 — Add a fifth word if this one guards something big. Each extra word multiplies the work by 7,776 again. Four words (~52 bits) shrug off the cheap lists; five (~65 bits) is the comfortable choice for a password-manager master password.",
+        "Step 5 — Practise it by using it. Type it ten times while saying it, and it moves into muscle memory within a day or two — the memorability is the entire point. A nonsense story linking the words (an apricot falls into a cleft, what a blunder, pass the tonic) is a fine memory aid, as long as the story came after the random words, not before.",
+      ],
+    },
+    {
+      type: "p",
+      text: "Compare the result with what most people actually do — take a pet's name, add their birth year and an exclamation mark — and the difference is not subtle. One is in the attacker's second dictionary pass. The other requires brute-forcing a space so large that the cheap passes never reach it.",
+    },
+    { type: "h2", text: "What to actually do" },
+    {
+      type: "p",
+      text: "Generate a passphrase of four or more random words for the accounts you type by hand, use a password manager to generate and store a unique random password for everything else, and turn on two-factor authentication wherever it matters — email and banking first. You only need to memorize one strong master password; the manager remembers the rest.",
+    },
+    {
+      type: "p",
+      text: "In practice your whole life needs only two or three memorised passphrases: the manager's master password, your computer or phone login, and possibly your email if you ever need it before the manager is open. Everything else — every shop, forum, and service — gets a unique, machine-generated password you will never see or type. That split is what makes the system survivable: a breach at any one site hands the attacker a random string that unlocks nothing else, and your three memorised phrases are each strong enough to stand on their own. The same principle covers the other secrets a generator hands you — recovery codes and API keys deserve the manager too, not a notes file. (For the related question of random identifiers, [UUID v4 vs UUID v7](/posts/uuid-v4-vs-uuid-v7) covers how the same randomness logic applies to IDs.)",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Choosing your own 'random' words. Cause: the human brain picks favourites — short, common, personally meaningful words in a sensible order. Fix: dice or a generator picks; you only memorise. The moment you swap a rolled word for one you like better, the entropy math no longer applies.",
+        "One great passphrase, used everywhere. Cause: it feels strong enough to share. Fix: strength does not survive reuse — a breach anywhere exposes it everywhere. Passphrases are for the two or three things you must type; everything else gets a unique generated password in the manager.",
+        "Adding complexity rules to a passphrase. Cause: a site demands a capital, a digit, and a symbol. Fix: comply minimally — capitalise one word, append one digit — and move on. The words carry the strength; the decoration is just a toll you pay at the gate.",
+        "Rotating passwords on a schedule. Cause: the old change-every-90-days advice. Fix: current guidance (NIST) is the opposite — leave a strong, unique password alone and change it when there is evidence of compromise. Forced rotation mostly produces predictable increments: Spring2026 becomes Summer2026.",
+        "Typing your master passphrase into a 'strength checker' website. Cause: curiosity. Fix: never enter a real password — master or otherwise — into any website that is not its own login form. A strength estimate is not worth handing the secret to a stranger's server logs.",
+      ],
     },
     { type: "h2", text: "The traps" },
     {
@@ -2231,10 +2283,22 @@ mogrify -format jpg -quality 85 *.png
         "Storing passwords in plaintext notes: if you have to write them down, use a password manager — that is what it is for.",
       ],
     },
-    { type: "h2", text: "What to actually do" },
+    { type: "h2", text: "Frequently asked questions" },
     {
       type: "p",
-      text: "Generate a passphrase of four or more random words for the accounts you type by hand, use a password manager to generate and store a unique random password for everything else, and turn on two-factor authentication wherever it matters — email and banking first. You only need to memorize one strong master password; the manager remembers the rest.",
+      text: "Do I need symbols in a passphrase? Only when a site forces them, and they add little. A symbol appended to a word is one of the first mutations cracking tools try, so its real contribution is small; an extra random word contributes roughly thirteen bits, every time, with no exceptions. When a form demands complexity, satisfy it with the cheapest decoration — one capitalised word, one digit at the end — and let the words do the work.",
+    },
+    {
+      type: "p",
+      text: "How long does a four-word passphrase take to crack? Against the offline arena — billions of guesses per second against a fast hash — a truly random four-word diceware passphrase at ~52 bits lasts on the order of years to centuries depending on the hash the site used, and a five-word one moves firmly into forget-about-it territory. The honest caveat: those numbers assume the words were actually random. A self-chosen four-word phrase can fall in minutes, because attackers model human choices first.",
+    },
+    {
+      type: "p",
+      text: "What if a site limits passwords to 16 characters? Then the passphrase strategy does not fit, and you should not squeeze it — a truncated passphrase loses exactly the length that made it strong. Use a manager-generated random 16 characters instead, which at ~100 bits of pool is stronger than most passphrases anyway. Short limits are a machine-password job; passphrases are for the secrets a human has to carry.",
+    },
+    {
+      type: "p",
+      text: "Is a password manager itself a single point of failure? It is a single point of protection, which is a different thing. A reputable manager encrypts your vault with your master passphrase, so even its own servers never see your passwords in readable form. Protect that one point properly — a five-word passphrase plus two-factor on the manager account — and it is far safer than the realistic alternative, which is the same password recycled across forty sites.",
     },
     { type: "h2", text: "Try it" },
     {

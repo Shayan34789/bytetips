@@ -1077,81 +1077,152 @@ export const posts: Post[] = [
     ],
   },
   {
-    slug: "hex-to-rgb-how-conversion-works",
-    title: "HEX to RGB: How the Conversion Actually Works",
-    excerpt:
-      "A hex color is just three base-16 numbers for red, green, and blue. Split it into pairs, convert each pair to decimal, and you have RGB — plus the shorthand and alpha traps.",
-    date: "2026-10-17",
-    readingTime: "5 min read",
-    author: "Shayan",
+  slug: "hex-to-rgb-how-conversion-works",
+  title: "HEX to RGB: How the Conversion Actually Works",
+  excerpt:
+    "A hex color is just three base-16 numbers for red, green, and blue. Split it into pairs, convert each pair to decimal, and you have RGB — plus the shorthand and alpha traps.",
+  date: "2026-10-17",
+  readingTime: "7 min read",
+  author: "Shayan",
     category: "CSS & Design",
-    content: [
-      {
-        type: "p",
-        text: "Short answer: a hex color like #FF5733 is three numbers written in base 16 — FF red, 57 green, 33 blue. Split the hex into pairs, convert each pair from hexadecimal to decimal (0–255), and you get rgb(255, 87, 51). Same color, different notation. Everything else on this page is detail around that one idea.",
-      },
-      { type: "h2", text: "The 30-second conversion" },
-      {
-        type: "p",
-        text: "Take #FF5733 and split it after the #: FF | 57 | 33. Each pair is a hexadecimal number — two base-16 digits. Convert each pair with (first digit × 16) + second digit, where A=10 through F=15:",
-      },
-      {
-        type: "list",
-        items: [
-          "FF → 15 × 16 + 15 = 255 (red)",
-          "57 → 5 × 16 + 7 = 87 (green)",
-          "33 → 3 × 16 + 3 = 51 (blue)",
-        ],
-      },
-      {
-        type: "p",
-        text: "So #FF5733 is rgb(255, 87, 51). In code, the whole thing is six lines:",
-      },
-      {
-        type: "code",
-        lang: "javascript",
-        code: `function hexToRgb(hex) {\n  hex = hex.replace("#", "");\n  const r = parseInt(hex.slice(0, 2), 16);\n  const g = parseInt(hex.slice(2, 4), 16);\n  const b = parseInt(hex.slice(4, 6), 16);\n  return { r, g, b };\n}\nhexToRgb("#FF5733"); // { r: 255, g: 87, b: 51 }\n\nfunction rgbToHex(r, g, b) {\n  return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");\n}\nrgbToHex(255, 87, 51); // "#ff5733"`,
-      },
-      { type: "h2", text: "Shorthand and alpha: the two variants" },
-      {
-        type: "p",
-        text: "Three-digit hex like #F00 is shorthand — each digit is doubled, so #F00 means #FF0000 (pure red). Eight-digit hex like #FF573380 adds an alpha channel as the last pair: 00 is fully transparent, FF is fully opaque. To get the CSS 0–1 alpha, divide by 255 — 80 hex is 128 decimal, so #FF573380 is rgba(255, 87, 51, 0.5).",
-      },
-      {
-        type: "code",
-        lang: "javascript",
-        code: `// Expand 3-digit shorthand first\nfunction expand(hex) {\n  hex = hex.replace("#", "");\n  return hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;\n}\nexpand("F00"); // "FF0000"\n\n// 8-digit hex → rgba()\nconst alpha = parseInt("80", 16) / 255; // 0.5019…\n"rgba(255, 87, 51, " + alpha.toFixed(2) + ")"; // "rgba(255, 87, 51, 0.50)"`,
-      },
-      { type: "h2", text: "The traps" },
-      {
-        type: "list",
-        items: [
-          "parseInt without a radix: parseInt(\"FF\") returns NaN, because without the second argument it parses as decimal. Always write parseInt(pair, 16).",
-          "Forgetting the #: split \"#FF5733\" into pairs without removing it first and every channel shifts — all three values come out wrong.",
-          "Using shorthand raw: #F00 is not red=15, green=0, blue=0 — it is #FF0000. Double each digit before converting.",
-          "Reading alpha as 0–100: in 8-digit hex the alpha pair is 00–FF like any other channel. FF means 255/255 = 1, fully opaque. Divide by 255 for the CSS value.",
-          "Assuming the color changed: conversion only renames the value. If the swatch looks different after converting, the bug is in your code, not the math.",
-        ],
-      },
-      { type: "h2", text: "When you actually need RGB" },
-      {
-        type: "p",
-        text: "For plain CSS, hex is fine and shorter. RGB earns its keep in three places: canvas and WebGL APIs, which hand you decimal channel arrays (getImageData returns 0–255 values); color math like blending or darkening, which is arithmetic on channels; and transparency — rgba(255, 87, 51, 0.5) works everywhere, while 8-digit hex still trips up older browsers and some design tools.",
-      },
-      { type: "h2", text: "Try it" },
-      {
-        type: "p",
-        text: "Paste any hex into the [Color Converter](https://byte-kit.dev/tools/color-converter) — it shows the RGB, HSL, and a live preview instantly, all in your browser with nothing uploaded.",
-      },
-    ],
-  },
+  content: [
+    {
+      type: "p",
+      text: "Short answer: a hex color like #FF5733 is three numbers written in base 16 — FF red, 57 green, 33 blue. Split the hex into pairs, convert each pair from hexadecimal to decimal (0–255), and you get rgb(255, 87, 51). Same color, different notation. Everything else on this page is detail around that one idea.",
+    },
+    { type: "h2", text: "Why base 16 at all" },
+    {
+      type: "p",
+      text: "Hex exists because one byte — a value from 0 to 255 — is exactly two hexadecimal digits, no more and no less. A color channel is one byte, so a full RGB color is always exactly six hex digits, tidy and fixed-width. Decimal cannot do that: 255, 87, and 51 take different numbers of characters and need separators to read. That is the whole reason designers inherit a programmer's number format — #FF5733 is not three numbers crammed together for style, it is three bytes written in their most compact exact form. Once you see it as bytes, the conversion stops being a trick and becomes a translation: each pair of hex digits is one byte, and converting the pair to decimal is just writing the same byte in the other base.",
+    },
+    { type: "h2", text: "The 30-second conversion" },
+    {
+      type: "p",
+      text: "Take #FF5733 and split it after the #: FF | 57 | 33. Each pair is a hexadecimal number — two base-16 digits. Convert each pair with (first digit × 16) + second digit, where A=10 through F=15:",
+    },
+    {
+      type: "list",
+      items: [
+        "FF → 15 × 16 + 15 = 255 (red)",
+        "57 → 5 × 16 + 7 = 87 (green)",
+        "33 → 3 × 16 + 3 = 51 (blue)",
+      ],
+    },
+    {
+      type: "p",
+      text: "So #FF5733 is rgb(255, 87, 51). In code, the whole thing is six lines:",
+    },
+    {
+      type: "code",
+      lang: "javascript",
+      code: `function hexToRgb(hex) {
+  hex = hex.replace("#", "");
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  return { r, g, b };
+}
+hexToRgb("#FF5733"); // { r: 255, g: 87, b: 51 }
+
+function rgbToHex(r, g, b) {
+  return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+rgbToHex(255, 87, 51); // "#ff5733"`,
+    },
+    { type: "h2", text: "Three worked examples to check your eye" },
+    {
+      type: "list",
+      items: [
+        "#000000 → rgb(0, 0, 0): every pair is 00, so every channel is off — black.",
+        "#FFFFFF → rgb(255, 255, 255): every pair is FF = 255, every channel at full — white.",
+        "#808080 → rgb(128, 128, 128): 80 hex is 8 × 16 = 128, exactly halfway — mid grey. Notice 80 is not '80%'; it is 128 of 255, which is why hex midpoints confuse people who read them as percentages.",
+        "#1E90FF → rgb(30, 144, 255): 1E = 1 × 16 + 14 = 30, 90 = 9 × 16 = 144, FF = 255 — a strong blue with a little red and a lot of green, which matches the steel-blue you see.",
+      ],
+    },
+    {
+      type: "p",
+      text: "Run those four through the formula until the pattern is automatic and you will never need a converter for reading colors again — only for writing them quickly.",
+    },
+    { type: "h2", text: "Shorthand and alpha: the two variants" },
+    {
+      type: "p",
+      text: "Three-digit hex like #F00 is shorthand — each digit is doubled, so #F00 means #FF0000 (pure red). Eight-digit hex like #FF573380 adds an alpha channel as the last pair: 00 is fully transparent, FF is fully opaque. To get the CSS 0–1 alpha, divide by 255 — 80 hex is 128 decimal, so #FF573380 is rgba(255, 87, 51, 0.5).",
+    },
+    {
+      type: "code",
+      lang: "javascript",
+      code: `// Expand 3-digit shorthand first
+function expand(hex) {
+  hex = hex.replace("#", "");
+  return hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;
+}
+expand("F00"); // "FF0000"
+
+// 8-digit hex → rgba()
+const alpha = parseInt("80", 16) / 255; // 0.5019…
+"rgba(255, 87, 51, " + alpha.toFixed(2) + ")"; // "rgba(255, 87, 51, 0.50)"`,
+    },
+    { type: "h2", text: "When you actually need RGB" },
+    {
+      type: "p",
+      text: "For plain CSS, hex is fine and shorter. RGB earns its keep in three places: canvas and WebGL APIs, which hand you decimal channel arrays (getImageData returns 0–255 values); color math like blending or darkening, which is arithmetic on channels; and transparency — rgba(255, 87, 51, 0.5) works everywhere, while 8-digit hex still trips up older browsers and some design tools.",
+    },
+    {
+      type: "p",
+      text: "There is a fourth place that matters more every year: design systems. The moment a color needs variations — a hover state 10% darker, a background at 8% opacity over white — someone has to do arithmetic, and arithmetic happens in decimal channels. That is also exactly the conversion the glassmorphism recipes need: [How to Create the Glassmorphism Effect with CSS](/posts/glassmorphism-css-effect) builds its tints as rgba() values, and every one of them starts life as a hex code from a palette that has to be converted pair by pair, alpha included.",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Reading hex pairs as percentages. Cause: 80 looks like 80%. Fix: a pair is a byte — 80 hex is 128/255, almost exactly 50%. If you need a percentage of full intensity, divide the decimal value by 255.",
+        "Dropping the leading zero on the way back. Cause: converting 5 to hex gives '5', and joining naively produces a five-digit color. Fix: padStart(2, '0') on every channel, as in the rgbToHex function above — a channel under 16 is where this bites.",
+        "Converting a 4-digit hex as if it were shorthand RGB. Cause: #RGBA exists too — four digits are red, green, blue, alpha, each doubled. Fix: check the length before converting: 3 = RGB shorthand, 4 = RGBA shorthand, 6 = RGB, 8 = RGBA.",
+        "Assuming uppercase matters. Cause: worrying that #ff5733 differs from #FF5733. Fix: it does not — hex digits are case-insensitive everywhere in CSS and code. Pick one style for your codebase and stop thinking about it.",
+      ],
+    },
+    { type: "h2", text: "The traps" },
+    {
+      type: "list",
+      items: [
+        "parseInt without a radix: parseInt(\"FF\") returns NaN, because without the second argument it parses as decimal. Always write parseInt(pair, 16).",
+        "Forgetting the #: split \"#FF5733\" into pairs without removing it first and every channel shifts — all three values come out wrong.",
+        "Using shorthand raw: #F00 is not red=15, green=0, blue=0 — it is #FF0000. Double each digit before converting.",
+        "Reading alpha as 0–100: in 8-digit hex the alpha pair is 00–FF like any other channel. FF means 255/255 = 1, fully opaque. Divide by 255 for the CSS value.",
+        "Assuming the color changed: conversion only renames the value. If the swatch looks different after converting, the bug is in your code, not the math.",
+      ],
+    },
+    { type: "h2", text: "Frequently asked questions" },
+    {
+      type: "p",
+      text: "Is #FFF the same as #FFFFFF? Yes — shorthand doubles each digit, so F becomes FF in all three channels. The shorthand only exists for colors whose pairs are doubled digits (#FF0000 → #F00); a color like #FF5733 has no shorthand, because 57 and 33 cannot be written as one doubled digit.",
+    },
+    {
+      type: "p",
+      text: "Why do my converted colors look identical but the numbers seem off by one? Rounding in the alpha channel, almost always: 0.5 × 255 is 127.5, which rounds to 128 (80 hex) going one way and reads back as 0.502 going the other. The RGB channels themselves never round — pairs convert exactly — so a one-step difference lives in alpha, and it is far below anything an eye can detect.",
+    },
+    {
+      type: "p",
+      text: "What about HSL — should I convert to that instead? Different tool for a different job. HSL describes a color the way humans talk about it (hue, saturation, lightness), which makes it the right format for generating variations of a color in code. But screens are driven in RGB, design tools hand you hex, and the conversion on this page is the bridge between the two worlds you actually live in.",
+    },
+    {
+      type: "p",
+      text: "Does converting change how the color prints or displays? No. Hex and RGB are two spellings of one value; every spelling reaches the screen as the same three channel intensities. If a converted color genuinely looks different somewhere, the cause is a color-profile or a bug — never the arithmetic.",
+    },
+    { type: "h2", text: "Try it" },
+    {
+      type: "p",
+      text: "Paste any hex into the [Color Converter](https://byte-kit.dev/tools/color-converter) — it shows the RGB, HSL, and a live preview instantly, all in your browser with nothing uploaded.",
+    },
+  ],
+},
 {
   slug: "how-to-convert-image-to-base64",
   title: "How to Convert an Image to Base64 (Data URI)",
   excerpt:
     "A data URI embeds an image's bytes directly in HTML or CSS as data:image/png;base64,... — perfect for tiny icons, terrible for photos. Here is when to use it and when to skip it.",
   date: "2026-10-17",
-  readingTime: "6 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "Images & Media",
   content: [
@@ -1164,6 +1235,11 @@ export const posts: Post[] = [
       type: "p",
       text: "The format is data:[mime type];base64,[encoded bytes]. The mime type tells the browser what the bytes are — image/png, image/jpeg, image/webp, or image/svg+xml — and everything after the comma is the base64 payload. The browser decodes it exactly as if it had downloaded a file, except there is no download: the bytes are already in the document.",
     },
+    { type: "h2", text: "Why base64 costs exactly 33%" },
+    {
+      type: "p",
+      text: "Base64 exists to carry binary data through channels that only accept text, and its price is fixed by arithmetic, not implementation. It encodes every 3 bytes of input as 4 characters from a 64-character alphabet — so the output is always 4/3 the input, a 33.3% overhead, before you count the data: prefix. A 3 KB icon becomes 4 KB of text: a fair trade for removing a request. A 300 KB photo becomes 400 KB of text welded into your HTML: the same trade, at a scale where it stops being fair. There is no smarter base64 that avoids this — the ratio is the format. Every decision in this post is really the question of whether avoiding one request is worth a guaranteed one-third size increase on that image, and the answer flips somewhere around a few tens of kilobytes.",
+    },
     { type: "h2", text: "Make one in the browser" },
     {
       type: "p",
@@ -1172,7 +1248,25 @@ export const posts: Post[] = [
     {
       type: "code",
       lang: "javascript",
-      code: `function imageToDataUri(file) {\n  return new Promise((resolve, reject) => {\n    const reader = new FileReader();\n    reader.onload = () => resolve(reader.result);\n    reader.onerror = () => reject(reader.error);\n    reader.readAsDataURL(file);\n  });\n}\n\n// Wire it to a file input\nconst input = document.querySelector("#upload");\ninput.addEventListener("change", async (e) => {\n  const uri = await imageToDataUri(e.target.files[0]);\n  document.querySelector("#preview").src = uri; // "data:image/png;base64,..."\n});`,
+      code: `function imageToDataUri(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+// Wire it to a file input
+const input = document.querySelector("#upload");
+input.addEventListener("change", async (e) => {
+  const uri = await imageToDataUri(e.target.files[0]);
+  document.querySelector("#preview").src = uri; // "data:image/png;base64,..."
+});`,
+    },
+    {
+      type: "p",
+      text: "The same string drops into CSS as a background — background-image: url(\"data:image/png;base64,...\") — which is where data URIs earn their keep most often: tiny repeating textures, custom bullets, and icons that belong to one component and nowhere else. In HTML it goes straight into an img src. Both work identically, because to the browser the data URI simply is the image.",
     },
     { type: "h2", text: "When it helps" },
     {
@@ -1182,6 +1276,26 @@ export const posts: Post[] = [
         "Email signatures: many email clients block external images until the reader allows them — an embedded data URI renders immediately.",
         "Single-file HTML: demos, reports, and saved pages that must work with no external assets.",
         "Blur-up placeholders: embed a tiny low-res preview that shows instantly while the full image loads.",
+      ],
+    },
+    { type: "h2", text: "The caching problem, in detail" },
+    {
+      type: "p",
+      text: "The trap list below names it briefly; here is why it deserves the emphasis. A linked image is cached on its own schedule: change your page a hundred times and the browser fetches the logo once. A data-URI image has no separate existence — it is part of the HTML or CSS file, so it is downloaded again every time that file changes or its cache expires, and it inflates the file that every single page view must load before anything renders. Worse, the image cannot be shared across pages: the same embedded logo in ten pages is ten downloads. This is why the size threshold matters more than the technique — under a few kilobytes, none of this costs anything real; at photo sizes, you have built a system where your heaviest assets ride inside your most-refetched file. Modern HTTP/2 and HTTP/3 also weakened the original argument: multiplexed connections made extra requests cheap, which moved the break-even point down, not up.",
+    },
+    { type: "h2", text: "Prefer plain SVG for icons" },
+    {
+      type: "p",
+      text: "If the icon is a vector, skip base64 entirely and inline the SVG as plain text. It is smaller than the base64 version, you can style it with CSS (fill, stroke, currentColor), and there is nothing to decode. Base64 only wins when the source is already a raster image you cannot replace. And if the SVG itself is a bloated editor export, shrink it first — [How to Reduce SVG File Size](/posts/how-to-reduce-svg-file-size) covers the SVGO pipeline that routinely cuts 30–70% before the icon goes anywhere near your markup.",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Embedding the hero photo. Cause: applying a small-icon technique at photo scale. Fix: photos stay as files, always — the 33% tax plus the caching loss makes embedded photos the worst of both worlds.",
+        "The wrong mime type in the prefix. Cause: copying a data URI and swapping the image without updating data:image/png to match. Fix: the mime type must describe the actual bytes; browsers are forgiving until the day they are not.",
+        "Forgetting the comma or the ;base64 marker. Cause: hand-trimming the string. Fix: a data URI is data: + mime + ;base64, + payload — generate it with a tool or FileReader rather than editing it by hand.",
+        "Base64-encoding an SVG instead of inlining it. Cause: treating all images alike. Fix: SVG is already text — inline it raw (URL-encoding only the few characters CSS requires) and keep CSS styling access that base64 throws away.",
       ],
     },
     { type: "h2", text: "The traps" },
@@ -1194,10 +1308,22 @@ export const posts: Post[] = [
         "Hard to edit: the image is buried in code, invisible to asset pipelines and image optimizers.",
       ],
     },
-    { type: "h2", text: "Prefer plain SVG for icons" },
+    { type: "h2", text: "Frequently asked questions" },
     {
       type: "p",
-      text: "If the icon is a vector, skip base64 entirely and inline the SVG as plain text. It is smaller than the base64 version, you can style it with CSS (fill, stroke, currentColor), and there is nothing to decode. Base64 only wins when the source is already a raster image you cannot replace.",
+      text: "What is the maximum size for a data URI image? There is no single spec limit — browsers accept data URIs of megabytes — but practical limits arrive much earlier: Internet Explorer historically capped them at 32 KB, and long before any hard limit, the render-blocking and caching costs make large ones a bad idea. Treat a few tens of kilobytes as the working ceiling and you will never meet the real one.",
+    },
+    {
+      type: "p",
+      text: "Do data URIs work in CSS and email? In CSS, yes, everywhere modern. In email, mostly — Gmail and most major clients render embedded images, which is why signatures use them — but Outlook has historically been patchy, and some clients strip or block them. Test in the clients your audience actually uses before relying on it for anything important.",
+    },
+    {
+      type: "p",
+      text: "Is a data URI slower to decode than a file? The decode itself is fast; the cost is upstream. The browser cannot start on the image until the containing HTML or CSS has downloaded and parsed past it, and the 33% larger payload travels over the network as text. For small images that sequencing is exactly the win — no separate request — and for large ones it is exactly the loss.",
+    },
+    {
+      type: "p",
+      text: "Can I convert a data URI back to an image file? Yes — everything after the comma is ordinary base64. Decode it, save the bytes with the extension the mime type names, and you have the original file back, byte for byte. Nothing is lost in either direction; base64 is a transport encoding, not a compression.",
     },
     { type: "h2", text: "Try it" },
     {
@@ -1212,7 +1338,7 @@ export const posts: Post[] = [
   excerpt:
     "UUID v4 is 122 bits of pure randomness; v7 starts with a millisecond timestamp so IDs sort by creation time. Use v4 by default, v7 for database primary keys.",
   date: "2026-10-17",
-  readingTime: "6 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "JWT & Security",
   content: [
@@ -1225,10 +1351,18 @@ export const posts: Post[] = [
       type: "p",
       text: "A v4 UUID fills 122 of its 128 bits with random data from a cryptographic generator. There is no timestamp, no machine identifier, nothing to read — that is the point. A v7 UUID spends its first 48 bits on the current Unix time in milliseconds, then fills the remaining 74 bits with randomness. Collisions are a non-issue for both: v4 has about 5.3 × 10³⁶ possible values, and v7 has about 1.9 × 10²² unique values per millisecond on top of the timestamp separating every millisecond.",
     },
+    {
+      type: "p",
+      text: "The anatomy is worth one look, because it explains the version digit everyone quotes. A UUID is written as five groups — 8-4-4-4-12 hex digits. The version lives in the first digit of the third group, and the variant in the first digit of the fourth. In a v7, the entire first group and half of the second are the timestamp, which is why sorting v7 strings alphabetically sorts them chronologically: the time is literally the prefix. In a v4, those same positions are random, which is why v4 strings sort into noise. Same container, opposite philosophies — one spends its most significant bits on when, the other refuses to say anything at all.",
+    },
     { type: "h2", text: "The database problem v7 solves" },
     {
       type: "p",
       text: "PostgreSQL, MySQL, and most relational databases index primary keys with B-trees, which love sequential inserts: each new row appends to the end of the index. A v4 primary key lands at a random position on every insert, causing page splits and a fragmented index that degrades write throughput and cache locality at scale. A v7 primary key starts with a timestamp, so new IDs are monotonically increasing and inserts append cleanly — the write pattern databases want, with no central coordinator the way auto-increment needs.",
+    },
+    {
+      type: "p",
+      text: "Two practical corollaries follow. First, storage: a UUID stored as a 36-character string costs 36+ bytes per row and per index entry, while stored as a native UUID or binary(16) it costs 16 — at a hundred million rows, that difference is gigabytes, and it also makes comparisons faster. Every major database has a native UUID type or an accepted binary pattern; use it instead of varchar. Second, v7's ordering only helps if the database actually compares the raw bytes in order — store it as text in a case-mixed or non-standard format and you can quietly throw the benefit away.",
     },
     { type: "h2", text: "Generate one in JavaScript" },
     {
@@ -1238,7 +1372,27 @@ export const posts: Post[] = [
     {
       type: "code",
       lang: "javascript",
-      code: `// v4 — built in, no install\ncrypto.randomUUID(); // "3b241101-e2bb-4d53-af18-1c9a2d80a910"\n\n// v7 — needs the uuid package (v11+)\nimport { v7 as uuidv7 } from "uuid";\nuuidv7(); // "018f3f5e-1c2d-7a9b-8f10-3c4d5e6f7a8b"`,
+      code: `// v4 — built in, no install
+crypto.randomUUID(); // "3b241101-e2bb-4d53-af18-1c9a2d80a910"
+
+// v7 — needs the uuid package (v11+)
+import { v7 as uuidv7 } from "uuid";
+uuidv7(); // "018f3f5e-1c2d-7a9b-8f10-3c4d5e6f7a8b"`,
+    },
+    { type: "h2", text: "What about v1, v5, and ULIDs" },
+    {
+      type: "p",
+      text: "The family is bigger than the headline pair. v1 also embeds a timestamp — but pairs it with the generating machine's MAC address, which leaks hardware identity; v7 exists largely to give v1's time-ordering without that leak. v5 is deterministic: the same namespace and name always hash to the same UUID, which is the right tool for deriving stable IDs from natural keys. And outside the UUID standard entirely, ULIDs and similar formats offer the same time-ordered idea in a more compact, case-insensitive encoding — worth knowing about, though v7's standardisation means databases and libraries increasingly speak it natively. For completeness: if you are generating identifiers people will type or read aloud, none of these are friendly, and a shorter random code is the better tool — the same generator family that makes [strong passphrases](/posts/password-vs-passphrase) is the right neighbourhood to look in.",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Storing UUIDs as varchar(36) in a busy table. Cause: the string form is what code prints, so it becomes the column type. Fix: native UUID or binary(16) storage — smaller, faster to compare, and it preserves v7's byte ordering.",
+        "Using a UUID as an unguessable secret. Cause: 'nobody can guess 122 random bits' feels airtight. Fix: uniqueness is not authorisation — tokens need expiry, revocation, and storage as hashes. A leaked UUID in a URL is a capability you cannot take back; design accordingly.",
+        "Sorting v7 as formatted text in the application. Cause: string sort mostly works — until a library emits uppercase or a different grouping. Fix: sort on the stored binary value, or normalise to lowercase canonical form before comparing; the guarantee lives in the bytes.",
+        "Generating v4 with a non-cryptographic random source. Cause: Math.random()-based UUID snippets copied from old tutorials. Fix: use crypto.randomUUID() or a maintained library — predictable 'random' UUIDs collide and leak in ways that only surface at scale.",
+      ],
     },
     { type: "h2", text: "The traps" },
     {
@@ -1254,6 +1408,23 @@ export const posts: Post[] = [
     {
       type: "p",
       text: "v4 by default — ad-hoc identifiers, idempotency keys, filenames, anything where order does not matter. v7 for database primary keys and records you want roughly time-ordered without a separate timestamp column. And if you need the same input to always produce the same ID, that is v5, not v4 or v7.",
+    },
+    { type: "h2", text: "Frequently asked questions" },
+    {
+      type: "p",
+      text: "Can two v4 UUIDs ever collide? In the same sense that a shuffled deck can deal the same hand twice: the space is 2^122, and the birthday bound says you would need roughly 2.7 × 10^18 UUIDs — billions per second for a century — before a collision becomes likely. Systems fail from many things; this will not be one of them. Generate freely and do not add uniqueness checks against a central registry 'just in case' — that reintroduces the coordination UUIDs exist to avoid.",
+    },
+    {
+      type: "p",
+      text: "Does v7 reveal how many records I create? Indirectly, yes: anyone holding two of your IDs can see the time between them, and a public sequence of IDs reveals your creation rate and total volume over time. Competitors have inferred business metrics from exactly this. It is the same trade as auto-increment IDs, softened — but if record timing or volume is sensitive, that is a real argument for v4 on anything public-facing.",
+    },
+    {
+      type: "p",
+      text: "Should API resources use v4 or v7 in URLs? v4, usually. The database benefit of v7 is internal; the URL is a public surface where the timestamp leak lives. A common pattern is both: v7 as the internal primary key, and the same value exposed — or a v4 public identifier alongside — depending on how much the timing matters. Decide per resource, not per habit.",
+    },
+    {
+      type: "p",
+      text: "My framework only generates v4 — is that fine? For almost every application, yes. The v7 advantage is a write-scaling optimisation that matters at high insert rates into indexed tables. A small or medium application will never feel v4's index fragmentation; switch when you have the scale to measure it, or when you are starting a table fresh and v7 costs you nothing.",
     },
     { type: "h2", text: "Try it" },
     {
@@ -1579,7 +1750,7 @@ npx svgo logo.svg -o logo.min.svg
   excerpt:
     "JSON converts cleanly to CSV when it is an array of flat objects — here is the Python, pandas, and jq for it, plus what to do with nested data.",
   date: "2026-10-17",
-  readingTime: "6 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "JSON & Data",
   content: [
@@ -1595,7 +1766,18 @@ npx svgo logo.svg -o logo.min.svg
     {
       type: "code",
       lang: "javascript",
-      code: `[\n  { "id": 1, "name": "Alice", "role": "admin" },\n  { "id": 2, "name": "Bob", "role": "editor" }\n]\n// becomes:\n// id,name,role\n// 1,Alice,admin\n// 2,Bob,editor`,
+      code: `[
+  { "id": 1, "name": "Alice", "role": "admin" },
+  { "id": 2, "name": "Bob", "role": "editor" }
+]
+// becomes:
+// id,name,role
+// 1,Alice,admin
+// 2,Bob,editor`,
+    },
+    {
+      type: "p",
+      text: "Everything difficult about this conversion lives in the gap between that ideal shape and real JSON. Real API responses nest objects inside objects, hide arrays inside records, and let different records carry different keys. None of that makes conversion impossible — it makes it a set of decisions instead of a single command. The sections below are those decisions, in the order you will meet them: flatten or not, which columns exist, and what to do with lists.",
     },
     { type: "h2", text: "Python: csv.DictWriter" },
     {
@@ -1605,7 +1787,33 @@ npx svgo logo.svg -o logo.min.svg
     {
       type: "code",
       lang: "python",
-      code: `import json, csv\n\nwith open("data.json") as f:\n    data = json.load(f)\n\nwith open("out.csv", "w", newline="") as f:\n    writer = csv.DictWriter(f, fieldnames=data[0].keys())\n    writer.writeheader()\n    writer.writerows(data)`,
+      code: `import json, csv
+
+with open("data.json") as f:
+    data = json.load(f)
+
+with open("out.csv", "w", newline="") as f:
+    writer = csv.DictWriter(f, fieldnames=data[0].keys())
+    writer.writeheader()
+    writer.writerows(data)`,
+    },
+    { type: "h2", text: "When records do not share the same keys" },
+    {
+      type: "p",
+      text: "The snippet above trusts the first record to name every column, and real data breaks that trust quietly: if record one lacks a field that record forty has, that field never becomes a column and its values vanish without an error. The robust version collects the union of all keys first, in first-seen order, and hands that to the writer. Missing values then become empty cells — which is the truth about the data — instead of disappearing entirely:",
+    },
+    {
+      type: "code",
+      lang: "python",
+      code: `fieldnames = []
+for row in data:
+    for key in row:
+        if key not in fieldnames:
+            fieldnames.append(key)
+
+writer = csv.DictWriter(f, fieldnames=fieldnames, restval="")
+writer.writeheader()
+writer.writerows(data)`,
     },
     { type: "h2", text: "Nested data: pandas json_normalize" },
     {
@@ -1615,7 +1823,23 @@ npx svgo logo.svg -o logo.min.svg
     {
       type: "code",
       lang: "python",
-      code: `import pandas as pd\n\ndata = [\n    {"id": 1, "user": {"name": "Alice", "city": "NYC"}},\n    {"id": 2, "user": {"name": "Bob", "city": "SF"}},\n]\n\ndf = pd.json_normalize(data, sep=".")\ndf.to_csv("out.csv", index=False)\n# id,user.name,user.city\n# 1,Alice,NYC\n# 2,Bob,SF`,
+      code: `import pandas as pd
+
+data = [
+    {"id": 1, "user": {"name": "Alice", "city": "NYC"}},
+    {"id": 2, "user": {"name": "Bob", "city": "SF"}},
+]
+
+df = pd.json_normalize(data, sep=".")
+df.to_csv("out.csv", index=False)
+# id,user.name,user.city
+# 1,Alice,NYC
+# 2,Bob,SF`,
+    },
+    { type: "h2", text: "Arrays inside records: join or explode" },
+    {
+      type: "p",
+      text: "Flattening handles nested objects; arrays need a different decision, because a cell cannot hold a list. You have exactly two honest options. Join the values into one cell with a separator that is not a comma — tags: [\"a\", \"b\"] becomes a|b — which keeps one row per record and is right when the list is a property of the record, like tags or categories. Or explode the array into multiple rows, one per element, repeating the record's other values on each row — right when each element is really its own fact, like one row per item in an order. What you must not do is let a tool silently stringify the array into a cell like \"['a', 'b']\": it looks converted, but no spreadsheet or parser downstream can use it, and the failure only shows up later, in someone else's hands.",
     },
     { type: "h2", text: "The jq one-liner" },
     {
@@ -1627,6 +1851,21 @@ npx svgo logo.svg -o logo.min.svg
       lang: "bash",
       code: `jq -r '(.[0] | keys_unsorted) as $k | $k, map([.[ $k[] ]])[] | @csv' data.json > out.csv`,
     },
+    {
+      type: "p",
+      text: "The @csv filter is doing the unglamorous work that makes this safe: it quotes values containing commas, quotes, or newlines exactly the way the CSV standard requires. That is the difference between a converter and a string join — and it is why hand-rolled conversions that split on commas in a text editor produce files that fall apart the first time a value contains one.",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Trusting the first record for the columns. Cause: fieldnames taken from data[0] alone. Fix: build the union of keys across every record first (snippet above) — silent column loss is the worst failure mode because nothing looks wrong.",
+        "Stringifying nested objects into cells. Cause: converting without flattening, so a cell ends up holding \"{'name': 'Alice'}\". Fix: flatten with json_normalize or jq's paths first; a cell should hold a value, not a data structure.",
+        "Opening the CSV in Excel and seeing one giant column. Cause: your locale's Excel expects semicolons. Fix: it is the delimiter setting, not your data — import via Data → From Text/CSV, or export with the separator your audience's Excel expects.",
+        "Losing leading zeros. Cause: Excel and Sheets reinterpret values like 00742 as numbers and trim them. Fix: for ID-like columns, this is a spreadsheet display behaviour, not a conversion error — the CSV itself is correct; format the column as text on import if the zeros matter.",
+        "Huge files converted in a browser tab. Cause: pasting a 200 MB JSON into an online tool. Fix: anything over a few megabytes belongs in the Python or jq route, which stream through the file instead of holding it in a web page.",
+      ],
+    },
     { type: "h2", text: "The traps" },
     {
       type: "list",
@@ -1637,6 +1876,23 @@ npx svgo logo.svg -o logo.min.svg
         "Forgetting newline=\"\" in Python: on Windows, the csv module without it writes a blank line after every row.",
         "Excel showing one column: in some locales Excel expects semicolons, not commas. If everything lands in a single column, the delimiter is the problem — not your data.",
       ],
+    },
+    { type: "h2", text: "Frequently asked questions" },
+    {
+      type: "p",
+      text: "Can CSV convert back to JSON losslessly? Only if the CSV never flattened anything. A flat table round-trips fine — every cell becomes a string, so numbers and booleans come back as text unless the tool infers types. But flattened dot-notation columns and joined arrays do not un-flatten themselves; the structure you decided away during conversion stays decided. Keep the original JSON as the master, exactly like keeping original images when you convert formats.",
+    },
+    {
+      type: "p",
+      text: "What if my JSON is one big object, not an array? Then there is no table yet — a single object is one row at most. Usually the array you want lives inside it, under a key like results, data, or items; extract that array and convert it. If the object is genuinely a key-value map, converting it as two columns (key, value) is the honest shape.",
+    },
+    {
+      type: "p",
+      text: "Why do my numbers come out as text when I convert back? Because CSV has no types — every cell is characters, and 42, true, and 2026-01-01 are all just strings that a reader may interpret. If a downstream tool needs real types, agree the interpretation explicitly (or keep a JSON Schema for the data) instead of hoping each tool guesses the same way.",
+    },
+    {
+      type: "p",
+      text: "Can I convert YAML the same way? Yes — YAML is a superset of JSON, so the path is YAML to JSON first, then everything on this page applies unchanged. [Convert YAML to JSON](/posts/convert-yaml-to-json) covers that first step.",
     },
     { type: "h2", text: "Try it" },
     {
@@ -1818,7 +2074,7 @@ npx svgo logo.svg -o logo.min.svg
   excerpt:
     "AVIF files are 30–50% smaller than JPG but won't open everywhere — here's how to convert them (including batch) and what happens to transparency.",
   date: "2026-10-17",
-  readingTime: "5 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "Images & Media",
   content: [
@@ -1830,6 +2086,10 @@ npx svgo logo.svg -o logo.min.svg
     {
       type: "p",
       text: "AVIF is an image format built on the AV1 video codec — the compression technology behind modern video streaming, applied to still images. It stores photos 30–50% smaller than JPG at the same visual quality, which is why CDNs serve it and some cameras and apps save in it. Chrome, Firefox, and Safari all open AVIF now, so the files usually arrive quietly — a download or a saved image that picked the format the site served.",
+    },
+    {
+      type: "p",
+      text: "The reason you are holding one is almost always someone else's bandwidth bill. Websites serve AVIF because it is the smallest widely supported photo format, and your browser happily saved the file in the format it received. Nothing went wrong — the file is healthy and the picture inside it is full quality. You are not fixing a broken image; you are translating a modern one into the lingua franca every other tool still speaks.",
     },
     { type: "h2", text: "Why convert to JPG at all" },
     {
@@ -1845,6 +2105,56 @@ npx svgo logo.svg -o logo.min.svg
         "Windows: the Photos app needs the AV1 Video Extension from the Microsoft Store to open AVIF at all. If you'd rather not install it, the browser route skips the problem entirely.",
       ],
     },
+    { type: "h2", text: "On the command line, for a whole folder" },
+    {
+      type: "p",
+      text: "For dozens of files, a converter page gets tedious. ImageMagick handles AVIF on recent builds, and ffmpeg always can — one command converts an entire folder, keeping names:",
+    },
+    {
+      type: "code",
+      lang: "bash",
+      code: `# ImageMagick, one file at a time (works in a loop for folders)
+magick photo.avif -quality 88 photo.jpg
+
+# ffmpeg — reliable AVIF support everywhere
+ffmpeg -i photo.avif -q:v 3 photo.jpg`,
+    },
+    {
+      type: "p",
+      text: "Whichever route you take, the quality dial deserves one sentence of care: JPG quality is not shared between tools. A browser converter's 88, ImageMagick's -quality 88, and ffmpeg's -q:v 3 are three different scales that land in roughly the same visual place — which is why the check that matters is opening one converted photo and looking at it, not memorising numbers.",
+    },
+    { type: "h2", text: "What you lose in the conversion (and what you don't)" },
+    {
+      type: "p",
+      text: "Converting AVIF to JPG is a one-way step down the format ladder, and it is worth knowing exactly which rungs you pass. You lose the size advantage — expect the JPG to be roughly 1.5–2× the AVIF's bytes at matched quality, because that efficiency was the AVIF's whole point. You can lose HDR and wide-gamut colour: AVIF supports 10-bit colour and HDR, JPG is 8-bit, so a vivid phone photo may flatten slightly. And you lose transparency, covered in the traps below. What you do not lose is the picture: at quality 85–90 the JPG is visually the same photograph, and for the purposes conversion exists for — opening, uploading, printing, sending — that is the trade working as intended. Keep the AVIF originals if the photos matter; the JPG is a compatibility copy, not a replacement master.",
+    },
+    { type: "h2", text: "Batch it — and a fallback for the web" },
+    {
+      type: "p",
+      text: "Converting one file at a time gets old fast. Queue every AVIF at once and download the results as a single ZIP. And if you're putting images on a website rather than converting for compatibility, you may not need to convert at all — serve AVIF with a JPG fallback and let the browser choose:",
+    },
+    {
+      type: "code",
+      lang: "html",
+      code: `<picture>
+  <source srcset="photo.avif" type="image/avif">
+  <img src="photo.jpg" alt="A photo that works everywhere">
+</picture>`,
+    },
+    {
+      type: "p",
+      text: "This is the same layered strategy as [WebP vs JPEG](/posts/webp-vs-jpeg): newest format first for browsers that support it, universal format underneath for everything else. And when the job is many files at once rather than one stubborn download, [How to Convert Multiple PNGs to JPG at Once](/posts/batch-convert-png-to-jpg) covers the batch discipline — copies first, one quality setting, check three files before trusting the rest.",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Deleting the AVIF after converting. Cause: treating the JPG as the new original. Fix: the JPG is a lossy compatibility copy of a more efficient master — keep the AVIF, especially for photos you care about.",
+        "Converting at quality 100 'to be safe'. Cause: assuming the top of the scale preserves the AVIF's quality. Fix: the conversion already re-encodes; 100 just makes the file enormous without recovering anything. 85–90 is the honest ceiling.",
+        "Blaming the converter for a washed-out photo. Cause: the AVIF held HDR or 10-bit colour that JPG physically cannot store. Fix: nothing is broken — it is a format limit. If the colour matters, keep that image as AVIF or PNG and convert a copy for sharing.",
+        "Renaming .avif to .jpg. Cause: hoping the extension is the only difference. Fix: the bytes inside are still AVIF and most tools will now fail harder, because they trust the extension. Convert properly — it takes seconds.",
+      ],
+    },
     { type: "h2", text: "The traps" },
     {
       type: "list",
@@ -1855,15 +2165,22 @@ npx svgo logo.svg -o logo.min.svg
         "Converting for a website: you may not need to — serve AVIF with a JPG fallback (see below) and let the browser choose.",
       ],
     },
-    { type: "h2", text: "Batch it — and a fallback for the web" },
+    { type: "h2", text: "Frequently asked questions" },
     {
       type: "p",
-      text: "Converting one file at a time gets old fast. Queue every AVIF at once and download the results as a single ZIP. And if you're putting images on a website rather than converting for compatibility, you may not need to convert at all — serve AVIF with a JPG fallback and let the browser choose:",
+      text: "Why won't my AVIF open in Photoshop or my editor? Because support arrived unevenly: browsers adopted AVIF early (it saves them bandwidth), while desktop editors added it late or behind plugins. Your file is fine — the editor is behind. Converting to JPG is the pragmatic bridge until the tool catches up, which is a matter of versions, not years.",
     },
     {
-      type: "code",
-      lang: "html",
-      code: `<picture>\n  <source srcset="photo.avif" type="image/avif">\n  <img src="photo.jpg" alt="A photo that works everywhere">\n</picture>`,
+      type: "p",
+      text: "Is AVIF better than WebP too? On pure compression, usually yes — AVIF is typically another 20% smaller than WebP at matched quality. WebP's counter-argument is speed and maturity: it encodes far faster and opens in more tools. For converting a file that will not open, though, the contest is irrelevant — JPG is the destination because everything reads it.",
+    },
+    {
+      type: "p",
+      text: "Will converting AVIF to JPG reduce quality noticeably? At 85–90, no — not in normal viewing. You are re-encoding a lossy format into another lossy format, so a purist zooming to 200% can find differences, but the practical quality was set by the original AVIF encode, and a high-quality JPG preserves nearly all of it.",
+    },
+    {
+      type: "p",
+      text: "Can I convert JPG back to AVIF later? You can, and websites do it routinely — but from the JPG, not from memory of the AVIF. Each generation keeps only what the last format kept. That is the same masters rule as every conversion on this site: convert from the best surviving original, never from a copy of a copy.",
     },
     { type: "h2", text: "Try it" },
     {
@@ -1878,7 +2195,7 @@ npx svgo logo.svg -o logo.min.svg
   excerpt:
     "box-shadow takes offset-x, offset-y, blur, spread, color, and an optional inset — here's what each value does, plus copy-paste recipes and the traps.",
   date: "2026-10-17",
-  readingTime: "5 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "CSS & Design",
   content: [
@@ -1901,7 +2218,15 @@ npx svgo logo.svg -o logo.min.svg
     {
       type: "code",
       lang: "css",
-      code: `.card {\n  /* offset-x | offset-y | blur | spread | color */\n  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);\n}`,
+      code: `.card {
+  /* offset-x | offset-y | blur | spread | color */
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+}`,
+    },
+    { type: "h2", text: "Why real shadows need two layers" },
+    {
+      type: "p",
+      text: "Look at any shadow in the physical world and it has two parts: a small, darker, sharper shadow right where the object meets the surface, and a larger, fainter, softer one spreading beyond it. A single box-shadow can only imitate one of those, which is why one-shadow cards look flat and fake no matter how you tune the numbers. CSS lets you stack shadows with commas — and the standard professional recipe is exactly the physical one: a tight contact shadow (small offset, small blur, higher opacity) layered over an ambient shadow (larger offset, large blur, low opacity). Every recipe in this post is built that way, and once you see shadows as two layers with two jobs, the values stop being guesswork: contact shadows stay small because contact is small, ambient shadows grow as the element's imagined height grows.",
     },
     { type: "h2", text: "Stacking multiple shadows" },
     {
@@ -1911,7 +2236,11 @@ npx svgo logo.svg -o logo.min.svg
     {
       type: "code",
       lang: "css",
-      code: `.card {\n  box-shadow:\n    0 1px 2px rgba(0, 0, 0, 0.08),\n    0 8px 24px rgba(0, 0, 0, 0.12);\n}`,
+      code: `.card {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.12);
+}`,
     },
     { type: "h2", text: "Inset: shadows on the inside" },
     {
@@ -1921,13 +2250,65 @@ npx svgo logo.svg -o logo.min.svg
     {
       type: "code",
       lang: "css",
-      code: `.button:active {\n  /* shadow moves inside: the button looks pressed */\n  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);\n}`,
+      code: `.button:active {
+  /* shadow moves inside: the button looks pressed */
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);
+}`,
+    },
+    { type: "h2", text: "An elevation scale you can steal" },
+    {
+      type: "p",
+      text: "Interfaces need consistency more than they need any single perfect shadow: a card, a dropdown, and a modal should read as three heights of the same system. A simple three-step scale, each step two layers, covers nearly everything:",
+    },
+    {
+      type: "code",
+      lang: "css",
+      code: `/* Low — cards, list items */
+.raised-1 {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.06);
+}
+/* Medium — dropdowns, popovers */
+.raised-2 {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 12px 28px rgba(0,0,0,0.10);
+}
+/* High — modals, dialogs */
+.raised-3 {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.10), 0 24px 48px rgba(0,0,0,0.14);
+}`,
+    },
+    {
+      type: "p",
+      text: "Notice the pattern as height grows: the ambient layer's offset and blur grow a lot, its opacity grows a little, and the contact layer barely changes. That is the physics showing through — a higher object casts a wider, softer shadow, while its contact point stays a contact point. Shadows also pair naturally with translucency: a floating panel with a soft shadow over a blurred backdrop is the core of [How to Create the Glassmorphism Effect with CSS](/posts/glassmorphism-css-effect), and it only reads as glass because the shadow sells the height.",
     },
     { type: "h2", text: "Two recipes to copy" },
     {
       type: "code",
       lang: "css",
-      code: `/* Subtle card lift */\n.card {\n  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);\n  transition: box-shadow 0.2s ease, transform 0.2s ease;\n}\n.card:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);\n}\n\n/* Soft glow */\n.glow {\n  box-shadow: 0 0 24px rgba(59, 130, 246, 0.45);\n}`,
+      code: `/* Subtle card lift */
+.card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+/* Soft glow */
+.glow {
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.45);
+}`,
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "One shadow doing both jobs. Cause: a single mid-blur, mid-opacity shadow asked to be contact and ambient at once. Fix: split it into two layers — tight and dark underneath the element's edge, wide and faint beyond it — as in the stacking section.",
+        "Pure black shadows at high opacity. Cause: defaulting to rgba(0,0,0,0.4) or stronger. Fix: real shadows on white surfaces rarely exceed about 0.15–0.2 total. On colored backgrounds, tint the shadow toward the background's hue instead of using neutral black, which reads as dirt.",
+        "Shadow on the wrong element. Cause: applying the shadow to a wrapper while the visible card is a child with its own background. Fix: the shadow follows the box of the element it is declared on — put it on the element whose edges the user actually sees.",
+        "Animating the shadow for hover on long lists. Cause: box-shadow is paint-expensive, and animating it on dozens of rows repaints constantly. Fix: animate transform and opacity where you can, and reserve shadow transitions for individual interactive elements like cards and buttons.",
+        "Negative spread surprises. Cause: spread shrinks the shadow before blur is applied, and large negative values can make it vanish entirely. Fix: that vanishing is sometimes the goal — a shadow visible only at the bottom uses a negative spread equal to the blur — but reach for it deliberately, not by accident.",
+      ],
     },
     { type: "h2", text: "The traps" },
     {
@@ -1939,6 +2320,23 @@ npx svgo logo.svg -o logo.min.svg
         "No layout space: shadows paint outside the element without moving anything — neighbors won't make room, so large blurs can overlap surrounding content.",
         "Heavy blurs everywhere: big blur radii on dozens of elements cost paint performance. Keep decorative shadows modest.",
       ],
+    },
+    { type: "h2", text: "Frequently asked questions" },
+    {
+      type: "p",
+      text: "What is the difference between box-shadow and drop-shadow()? box-shadow follows the element's rectangular box — a transparent PNG inside it still casts a rectangle. The filter function drop-shadow() follows the actual alpha shape of the content, so the same PNG casts a shadow shaped like the image. Use box-shadow for cards and panels, drop-shadow() for irregular shapes and icons — and note drop-shadow() has no spread or inset.",
+    },
+    {
+      type: "p",
+      text: "Can a shadow appear on only one side? Yes, with the negative-spread technique: set the spread to the negative of the blur radius and offset toward the side you want — the shadow shrinks on the other three sides until only the offset side escapes. box-shadow: 0 10px 12px -8px rgba(0,0,0,0.2) gives a bottom-only shadow, a common trick under sticky headers.",
+    },
+    {
+      type: "p",
+      text: "Why does my shadow look different in dark mode? Because a dark shadow on a dark background is nearly invisible — depth in dark interfaces usually comes from lighter edges and background steps, not shadows. Many design systems reduce shadow opacity drastically or drop shadows entirely in dark mode and let a subtle border do the separating.",
+    },
+    {
+      type: "p",
+      text: "Does border-radius affect the shadow? Yes — the shadow follows the element's border box including its rounded corners, which is exactly why card shadows look right without extra work. Change the radius and the shadow's corners follow automatically.",
     },
     { type: "h2", text: "Try it" },
     {

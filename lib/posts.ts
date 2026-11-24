@@ -2084,7 +2084,7 @@ mogrify -format jpg -quality 85 *.png
   excerpt:
     "WebP is 25–35% smaller than JPEG at the same quality and works in 97%+ of browsers — but JPEG still wins for email, print, and legacy software.",
   date: "2026-10-17",
-  readingTime: "5 min read",
+  readingTime: "7 min read",
   author: "Shayan",
     category: "Images & Media",
   content: [
@@ -2096,6 +2096,11 @@ mogrify -format jpg -quality 85 *.png
     {
       type: "p",
       text: "WebP was built for the web; JPEG was built in 1992 for maximum compatibility. At the same visual quality, a WebP photo runs 25–35% smaller than the JPEG, which means faster page loads and less bandwidth. WebP also does two things JPEG simply cannot: transparency (an alpha channel, like PNG) and animation (as a lighter GIF replacement). Browser support is no longer the catch it once was — every current browser has supported WebP for years, covering over 97% of users.",
+    },
+    { type: "h2", text: "How WebP actually gets smaller" },
+    {
+      type: "p",
+      text: "JPEG compresses a photo by chopping it into 8×8 blocks and approximating each one, largely independently of its neighbours. WebP, which Google built from video-codec technology, predicts each block from the blocks around it and only stores the difference between the prediction and reality — and in a photograph, neighbouring areas predict each other very well. Better predictions mean less data left to store, which is where most of the 25–35% saving comes from. WebP also has two distinct modes JPEG cannot match. Lossy WebP is the JPEG competitor described above. Lossless WebP is a PNG competitor: it stores every pixel exactly, usually 20–30% smaller than the equivalent PNG, and both modes can carry an alpha channel. One format quietly covers the jobs of three — JPEG for photos, PNG for graphics with transparency, and even GIF for short animations — which is why it became the web's default delivery format.",
     },
     { type: "h2", text: "When JPEG still wins" },
     {
@@ -2114,6 +2119,11 @@ mogrify -format jpg -quality 85 *.png
         "Legacy software: JPEG — old editors and viewers may not open WebP at all.",
       ],
     },
+    { type: "h2", text: "Worked example: one photo-heavy page, measured" },
+    {
+      type: "p",
+      text: "Percentages are easy to nod at, so here is a concrete page: a blog post with 12 photographs, exported as JPEGs at quality 82, totalling 4.8 MB of images. The same 12 photos converted to WebP at matched visual quality come to about 3.3 MB — a saving of roughly 1.5 MB, or 31%, right in the expected range. What does 1.5 MB buy? On a mid-range phone over a typical 4G connection, that is around a second off the time the page's main image finishes loading — and the largest image on the page is exactly what Google's Largest Contentful Paint measures. Multiply it out and the bandwidth side matters too: a page viewed 50,000 times a month saves about 75 GB of transfer. Nothing else on the page changed — same photos, same layout, same quality slider position. Format choice is one of the few optimisations that is pure win on the web, with the only cost being the fallback discipline in the next section.",
+    },
     { type: "h2", text: "The rule of thumb" },
     {
       type: "p",
@@ -2122,7 +2132,30 @@ mogrify -format jpg -quality 85 *.png
     {
       type: "code",
       lang: "html",
-      code: `<picture>\n  <source srcset="photo.webp" type="image/webp">\n  <img src="photo.jpg" alt="A photo" width="1200" height="800">\n</picture>`,
+      code: `<picture>
+  <source srcset="photo.webp" type="image/webp">
+  <img src="photo.jpg" alt="A photo" width="1200" height="800">
+</picture>`,
+    },
+    {
+      type: "p",
+      text: "Two details in that snippet do quiet work. The JPEG lives on the img tag, not in a source, so the fallback is the default rather than an afterthought — anything that ignores the picture element entirely still gets a working image. And the width and height attributes stay on the img, so the browser reserves the right space before the image loads and the page does not jump around. If you run a large site, the same negotiation can happen on the server or CDN instead — the server checks the browser's Accept header and serves WebP from the same URL — but for most sites the picture element is enough, and it has the advantage that you can see exactly what will happen by reading your own markup.",
+    },
+    { type: "h2", text: "Where AVIF fits" },
+    {
+      type: "p",
+      text: "There is a newer format one step beyond WebP: AVIF typically shaves another 20% or so off WebP's file sizes, at the cost of slower encoding and slightly patchier tooling support. The sensible order for a website today is AVIF first, WebP as its fallback, JPEG as the universal fallback — the picture element stacks all three the same way. If you have files in AVIF that other software refuses to open, [How to Convert AVIF to JPG](/posts/how-to-convert-avif-to-jpg) covers going back to the safe format. And if your question is really about still images generally — which format for which job — [PNG vs JPG: Which Format to Use](/posts/png-vs-jpg-which-format-to-use) covers the two classics head to head.",
+    },
+    { type: "h2", text: "Common mistakes and how to fix them" },
+    {
+      type: "list",
+      items: [
+        "Replacing the originals with WebP. Cause: treating conversion as migration. Fix: WebP is generated, never archived — keep the JPEG or PNG masters and rebuild WebP from them any time, exactly like the masters rule in [How to Convert Multiple PNGs to JPG at Once](/posts/batch-convert-png-to-jpg).",
+        "Converting a JPEG at quality 100 into a WebP at quality 100 and comparing sizes. Cause: comparing at matched numbers instead of matched appearance — quality scales are not shared between formats. Fix: compare at matched visual quality; that is the comparison the 25–35% figure comes from.",
+        "Serving WebP with no fallback. Cause: assuming 97% support means 100%. Fix: the remaining few percent are real visitors — email clients, old browsers, embedded web views. The picture pattern above costs four lines; use it.",
+        "Sending WebP where the file leaves the web. Cause: one format for everything. Fix: email, print, and downloads for other people stay JPEG; WebP is for your own pages, where you control the markup.",
+        "Judging by one hero image. Cause: testing the format on a single photo and generalising. Fix: convert a representative set — photos, a graphic with transparency, something with text — because WebP's advantage varies by image type, and graphics behave differently from photos.",
+      ],
     },
     { type: "h2", text: "The traps" },
     {
@@ -2133,6 +2166,23 @@ mogrify -format jpg -quality 85 *.png
         "Assuming smaller means worse: at the same quality setting, WebP's smaller file is the same picture. Compare at matched quality, not matched file size.",
         "Forgetting transparency needs: if your image needs an alpha channel, JPEG was never an option — that's WebP or PNG territory.",
       ],
+    },
+    { type: "h2", text: "Frequently asked questions" },
+    {
+      type: "p",
+      text: "Does converting JPEG to WebP lose quality? Converting any lossy file re-encodes it, so a JPEG-to-WebP conversion at matched quality loses a small additional amount — usually invisible, but real. The clean path is to generate the WebP from the highest-quality source you have (the original photo or PNG master), not from the JPEG you already compressed. That is the same masters rule as every other conversion: always work from the best surviving original.",
+    },
+    {
+      type: "p",
+      text: "Does Google rank WebP images better for SEO? Not directly — there is no WebP bonus in search rankings. The benefit is indirect and real: smaller images load faster, faster pages score better on page-experience measures like Largest Contentful Paint, and those do feed into rankings. You adopt WebP for speed; the SEO follows the speed.",
+    },
+    {
+      type: "p",
+      text: "Why can't I open WebP files on my computer? Because outside the browser, support is still uneven — some photo viewers, older editors, and Windows' built-in tools historically refused WebP or needed a codec installed. It is improving every year, but it is exactly why JPEG remains the format for files you hand to other people: it opens everywhere, every time.",
+    },
+    {
+      type: "p",
+      text: "Should I just skip WebP and use AVIF? Not yet, for most sites. AVIF is smaller again, but it encodes slowly and its fallback story still runs through WebP. Serving AVIF with a WebP fallback gets you both wins; serving AVIF alone bets your images on the newest format with the least tooling. Add AVIF on top of WebP, not instead of it.",
     },
     { type: "h2", text: "Try it" },
     {
